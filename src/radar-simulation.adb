@@ -40,6 +40,31 @@ package body Radar.Simulation is
       end loop;
    end Step;
 
+
+   procedure Scan 
+      (Sim     : in Simulation;
+       Station : in Radar.Detection.Radar_Station)
+   is
+      Count : Natural := 0;
+   begin
+      Put_Line ("==== RADAR SCAN ====");
+
+      for I in 1 .. Sim.Count loop
+         if Radar.Detection.Is_Detected 
+            (Station, Sim.Targets (I)) then
+
+            Put_Line ("Target detected: "
+            & Sim.Targets (I).ID'Image);
+
+            Count := Count + 1;
+         end if;
+      end loop;
+
+      if Count = 0 then
+         Put_Line ("No target detected");
+      end if;
+   end Scan;
+
    procedure Print (Sim : in Simulation) is
    begin
       Put_Line ("Targets : " & Sim.Count'Image);

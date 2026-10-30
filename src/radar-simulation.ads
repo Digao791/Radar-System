@@ -1,4 +1,5 @@
 with Radar.Targets;
+with Radar.Detection;
 
 package Radar.Simulation is
 
@@ -18,6 +19,10 @@ package Radar.Simulation is
    procedure Step 
       (Sim        : in out Simulation;
        Delta_Time : in Float);
+      
+   procedure Scan
+      (Sim        : in Simulation;
+       Station    : Radar.Detection.Radar_Station);
       
    procedure Print (Sim : in Simulation);
 

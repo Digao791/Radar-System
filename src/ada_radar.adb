@@ -1,4 +1,5 @@
 with Ada.Text_IO;
+with Radar.Detection;
 with Radar.Targets;
 with Radar.Simulation;
 
@@ -7,6 +8,8 @@ use Ada.Text_IO;
 procedure Ada_Radar is
 
    Sim : Radar.Simulation.Simulation;
+   Station : Radar.Detection.Radar_Station := 
+      (X => 0.0, Y => 0.0, Radar_Range => 20.0);
 
    Target_1 : Radar.Targets.Target := 
       (ID => 1,
@@ -18,8 +21,8 @@ procedure Ada_Radar is
 
    Target_2 : Radar.Targets.Target := 
       (ID => 2,
-       X => -15.0,
-       Y => 30.0,
+       X => 20.0,
+       Y => 0.0,
        Speed => 0.30,
        Heading => 180.0
       );
@@ -40,23 +43,16 @@ begin
    Radar.Simulation.Add_Target (Sim, Target_2);
    Radar.Simulation.Add_Target (Sim, Target_3);
 
-   New_Line;
-
-   Put_Line ("Initial State");
-
-   Radar.Simulation.Print (Sim);
-
    for Second in 1 .. 5 loop
-
-      Radar.Simulation.Step 
-         (Sim  => Sim,
-          Delta_Time => 1.0);
-      
-      New_Line;
 
       Put_Line 
          ("=== Time: " & Second'Image & " seconds");
 
+      Radar.Simulation.Scan (Sim, Station);
+
+      Radar.Simulation.Step (Sim, 1.0);
       Radar.Simulation.Print (Sim);
+      New_Line;
+
    end loop;
 end Ada_Radar;
