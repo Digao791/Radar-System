@@ -22,9 +22,18 @@ procedure Ada_Radar is
 begin
    Put_Line ("==== ADA RADAR ====");
    New_Line;
-
+   Put_Line ("Initial Position");
    Radar.Targets.Print (Target_1);
    New_Line;
-   Radar.Targets.Print (Target_2);
+   
+   for I in 1 .. 5 loop
+      Radar.Targets.Move 
+         (T          => Target_1, 
+          Delta_Time => 1.0);
+      
+      Put_Line ("Time: " & I'Image & " seconds");
+      Radar.Targets.Print (Target_1);
+      New_Line;
+   end loop;
 
 end Ada_Radar;

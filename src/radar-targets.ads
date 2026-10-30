@@ -9,5 +9,9 @@ package Radar.Targets is
    end record;
 
    procedure Print (T : Target);
-   
+
+   procedure Move 
+      (T : in out Target; 
+       Delta_Time : in Float);
+
 end Radar.Targets;
