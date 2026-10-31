@@ -3,8 +3,10 @@ with Radar.Detection;
 with Radar.Targets;
 with Radar.Simulation;
 with Radar.Shared_State;
+with Ada.Real_Time;
 
 use Ada.Text_IO;
+use Ada.Real_Time;
 
 procedure Ada_Radar is
 
@@ -34,19 +36,42 @@ begin
    Shared.Add_Target (Target_1);
    Shared.Add_Target (Target_2);
 
-   for Second in 1 .. 6 loop
+   declare
 
-      Put_Line ("=== Time: " & Second'Image & " seconds");
-
-      declare
-         Snapshot : constant Radar.Simulation.Simulation :=
-            Shared.Get_Snapshot;
+      Start_Time : constant Time := Clock;
+      
+      task Simulation_Task;
+      task body Simulation_Task is
+         Next_Time : Time := Start_Time;
       begin
-         Radar.Simulation.Scan (Snapshot, Station);
-      end;
+         for Second in 1 .. 5 loop
 
-      Shared.Step (1.0);
+            Next_Time := Next_Time + Seconds (1);
+            delay until Next_Time;
+            Shared.Step (1.0);
 
-   end loop;
+            Put_Line ("[SIMULATION] Tick: " & Second'Image);
+         end loop;
+      end Simulation_Task;
 
+   begin
+
+      for Second in 0 .. 5 loop
+         delay until
+            Start_Time
+            + Milliseconds (500)
+            + Seconds (Second);
+
+         declare
+            Snapshot : Radar.Simulation.Simulation :=
+               Shared.Get_Snapshot;
+         begin
+            Put_Line ("[RADAR] Scan: " & Second'Image);
+            Radar.Simulation.Scan (Snapshot, Station);
+            New_Line;
+         end;
+      end loop;
+   end;
+   
+   Put_Line ("Simulation Finished.");
 end Ada_Radar;
