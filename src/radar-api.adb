@@ -30,9 +30,13 @@ package body Radar.API is
          when Radar.Routes.Get_Status =>
             return Radar.Handlers.Status;
 
-         when Radar.Routes.Get_Targets |
-              Radar.Routes.Pause_Radar |
-              Radar.Routes.Resume_Radar =>
+         when Radar.Routes.Pause_Radar =>
+            return Radar.Handlers.Pause;
+
+         when Radar.Routes.Resume_Radar =>
+            return Radar.Handlers.Resume;
+            
+         when Radar.Routes.Get_Targets =>
 
             return AWS.Response.Build
               (Content_Type => "application/json",
