@@ -12,3 +12,6 @@ executables = ["ada_radar"]
 
 [[depends-on]]
 aws = "^25.2.0"
+
+[[depends-on]]
+gnatcoll = "^25.0.0"

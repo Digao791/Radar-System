@@ -4,6 +4,7 @@ with AWS.Messages;
 
 with Radar.Routes;
 with Radar.Handlers;
+with Radar.Handlers.Targets;
 
 package body Radar.API is
 
@@ -35,14 +36,9 @@ package body Radar.API is
 
          when Radar.Routes.Resume_Radar =>
             return Radar.Handlers.Resume;
-            
-         when Radar.Routes.Get_Targets =>
 
-            return AWS.Response.Build
-              (Content_Type => "application/json",
-               Message_Body =>
-                 "{""error"":""Endpoint not implemented""}",
-               Status_Code => AWS.Messages.S501);
+         when Radar.Routes.Get_Targets =>
+            return Radar.Handlers.Targets.Get_All;
 
          when Radar.Routes.Not_Found =>
             return AWS.Response.Build

@@ -32,6 +32,11 @@ package Radar.Simulation is
       
    procedure Print (Sim : in Simulation);
 
+   function Get_Count (Sim : in Simulation)
+      return Natural;
+
+   function Get_Target_At (Sim : in Simulation; Index : in Positive)
+      return Radar.Targets.Target;
 private
 
    type Simulation is record

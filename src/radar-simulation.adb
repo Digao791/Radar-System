@@ -100,4 +100,25 @@ package body Radar.Simulation is
 
       end loop;
    end Print;
+
+   function Get_Count
+      (Sim : Simulation) return Natural
+   is
+   begin
+      return Sim.Count;
+   end Get_Count;
+
+
+   function Get_Target_At
+      (Sim   : Simulation;
+         Index : Positive) return Radar.Targets.Target
+   is
+   begin
+      if Index > Sim.Count then
+         raise Constraint_Error with "Invalid target index";
+      end if;
+
+      return Sim.Targets (Index);
+   end Get_Target_At;
+   
 end Radar.Simulation;
