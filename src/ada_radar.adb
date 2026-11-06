@@ -6,22 +6,25 @@ with Radar.Simulation;
 with Radar.Detection;
 with Radar.Shared_State;
 with Radar.Engine;
+with Radar.Service;
 
 procedure Ada_Radar is
 
    use Ada.Text_IO;
 
-   Shared : aliased
-     Radar.Shared_State.Shared_Simulation;
+   -- Shared simulation data
+   Shared : aliased Radar.Shared_State.Shared_Simulation;
 
-   State : aliased
-     Radar.Engine.Engine_State;
+   -- Engine execution status
+   State : aliased Radar.Engine.Engine_State;
 
+   -- Radar station
    Station : constant Radar.Detection.Radar_Station :=
      (X           => 0.0,
       Y           => 0.0,
       Radar_Range => 30.0);
 
+   -- First target
    Target_1 : constant Radar.Targets.Target :=
      (ID      => 1,
       X       => 10.0,
@@ -29,6 +32,7 @@ procedure Ada_Radar is
       Speed   => 1.0,
       Heading => 90.0);
 
+   -- Second target
    Target_2 : constant Radar.Targets.Target :=
      (ID      => 2,
       X       => 40.0,
@@ -40,56 +44,87 @@ begin
 
    Put_Line ("=== ADA RADAR ===");
 
+   -- Initialize simulation
    Shared.Initialize;
+
+   -- Register targets
    Shared.Add_Target (Target_1);
    Shared.Add_Target (Target_2);
 
-   
+   -- Start and control the engine
+   declare
 
-declare
+      Engine : aliased Radar.Engine.Engine_Task
+        (Shared'Access, State'Access);
 
-   Engine : Radar.Engine.Engine_Task
-     (Shared'Access, State'Access);
+      Service : Radar.Service.Radar_Service
+        (Engine'Access, State'Access, Shared'Access);
 
-   Success : Boolean;
+      Success : Boolean;
 
-begin
+   begin
 
+      Put_Line
+        ("[SERVICE] Initial status: "
+         & Radar.Engine.Engine_Status'Image
+             (Radar.Service.Get_Status (Service)));
+
+      -- Let the simulation run
+      delay 2.5;
+
+      -- Pause
+      Radar.Service.Pause (Service, Success);
+
+      Put_Line
+        ("[SERVICE] Pause: " & Success'Image);
+
+      Put_Line
+        ("[SERVICE] Current status: "
+         & Radar.Engine.Engine_Status'Image
+             (Radar.Service.Get_Status (Service)));
+
+      -- Keep the engine paused
+      delay 3.0;
+
+      -- Resume
+      Radar.Service.Resume (Service, Success);
+
+      Put_Line
+        ("[SERVICE] Resume: " & Success'Image);
+
+      -- Let the simulation run again
+      delay 3.5;
+
+      -- Stop
+      Radar.Service.Stop (Service, Success);
+
+      Put_Line
+        ("[SERVICE] Stop: " & Success'Image);
+
+   end;
+
+   -- Engine task has terminated
    Put_Line
-     ("[MAIN] Initial status: "
-      & State.Get_Status'Image);
+     ("[MAIN] Final engine status: "
+      & Radar.Engine.Engine_Status'Image
+          (State.Get_Status));
 
-   delay 2.5;
+   -- Read the final simulation snapshot
+   declare
 
-   Engine.Pause (Success);
+      Snapshot : constant Radar.Simulation.Simulation :=
+        Shared.Get_Snapshot;
 
-   Put_Line
-     ("[MAIN] Pause accepted: "
-      & Success'Image);
+   begin
 
-   Put_Line
-     ("[MAIN] Current status: "
-      & State.Get_Status'Image);
+      Put_Line ("=== FINAL RADAR STATE ===");
 
-   delay 3.0;
+      Radar.Simulation.Print (Snapshot);
 
-   Engine.Resume (Success);
+      Put_Line ("=== DETECTED TARGETS ===");
 
-   Put_Line
-     ("[MAIN] Resume accepted: "
-      & Success'Image);
+      Radar.Simulation.Scan (Snapshot, Station);
 
-   delay 3.5;
-
-   Put_Line ("[MAIN] Stopping...");
-   Engine.Stop;
-
-end;
-
--- Engine_Task has terminated here.
-
-Put_Line
-  ("[MAIN] Status after termination: "
-   & State.Get_Status'Image);
+   end;
 
 end Ada_Radar;
