@@ -9,3 +9,6 @@ website = ""
 tags = []
 
 executables = ["ada_radar"]
+
+[[depends-on]]
+aws = "^25.2.0"
