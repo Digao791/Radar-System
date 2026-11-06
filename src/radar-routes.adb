@@ -3,6 +3,7 @@ package body Radar.Routes is
    Hello_Path : constant String := "/api/radar/hello";
    Status_Path : constant String := "/api/radar/status";
    Targets_Path : constant String := "/api/radar/targets";
+   Detections_Path : constant String := "/api/radar/detections";
    Pause_Path : constant String := "/api/radar/pause";
    Resume_Path : constant String := "/api/radar/resume";
 
@@ -14,6 +15,8 @@ package body Radar.Routes is
          return Get_Status;
       elsif Method = "GET" and then URI = Targets_Path then
          return Get_Targets;
+      elsif Method = "GET" and then URI = Detections_Path then
+         return Get_Detections;
       elsif Method = "POST" and then URI = Pause_Path then
          return Pause_Radar;
       elsif Method = "POST" and then URI = Resume_Path then

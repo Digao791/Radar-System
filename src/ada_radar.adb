@@ -7,6 +7,7 @@ with Radar.Detection;
 with Radar.Shared_State;
 with Radar.Engine;
 with Radar.Service;
+with Radar.Configuration;
 
 procedure Ada_Radar is
 
@@ -19,25 +20,22 @@ procedure Ada_Radar is
    State : aliased Radar.Engine.Engine_State;
 
    -- Radar station
-   Station : constant Radar.Detection.Radar_Station :=
-     (X           => 0.0,
-      Y           => 0.0,
-      Radar_Range => 30.0);
+   Config : aliased Radar.Configuration.Radar_Config;
 
    -- First target
    Target_1 : constant Radar.Targets.Target :=
      (ID      => 1,
-      X       => 10.0,
-      Y       => 0.0,
-      Speed   => 1.0,
+      X       => 100.0,
+      Y       => 200.0,
+      Speed   => 0.0,
       Heading => 90.0);
 
    -- Second target
    Target_2 : constant Radar.Targets.Target :=
      (ID      => 2,
-      X       => 40.0,
-      Y       => 0.0,
-      Speed   => 2.0,
+      X       => 600.0,
+      Y       => 400.0,
+      Speed   => 0.0,
       Heading => 180.0);
 
 begin
@@ -58,7 +56,7 @@ begin
         (Shared'Access, State'Access);
 
       Service : Radar.Service.Radar_Service
-        (Engine'Access, State'Access, Shared'Access);
+        (Engine'Access, State'Access, Shared'Access, Config'Access);
 
       Success : Boolean;
 
@@ -140,7 +138,7 @@ begin
 
       Put_Line ("=== DETECTED TARGETS ===");
 
-      Radar.Simulation.Scan (Snapshot, Station);
+      Radar.Simulation.Scan (Snapshot, Config.Get_Station);
 
    end;
 

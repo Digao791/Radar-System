@@ -100,4 +100,21 @@ package body Radar.Service is
       return Service.Shared.Get_Snapshot;
    end Get_Snapshot;
 
+   function Get_Station
+   (Service : Radar_Service)
+      return Radar.Detection.Radar_Station
+   is
+   begin
+      return Service.Config.Get_Station;
+   end Get_Station;
+
+
+   procedure Set_Station
+   (Service : in out Radar_Service;
+      Station : Radar.Detection.Radar_Station)
+   is
+   begin
+      Service.Config.Set_Station (Station);
+   end Set_Station;
+
 end Radar.Service;
