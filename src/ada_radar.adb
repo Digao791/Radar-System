@@ -14,6 +14,9 @@ procedure Ada_Radar is
    Shared : aliased
      Radar.Shared_State.Shared_Simulation;
 
+   State : aliased
+     Radar.Engine.Engine_State;
+
    Station : constant Radar.Detection.Radar_Station :=
      (X           => 0.0,
       Y           => 0.0,
@@ -42,51 +45,39 @@ begin
    Shared.Add_Target (Target_2);
 
    
+
 declare
 
    Engine : Radar.Engine.Engine_Task
-     (Shared'Access);
+     (Shared'Access, State'Access);
 
    Success : Boolean;
-   Status  : Radar.Engine.Engine_Status;
 
 begin
 
-   Engine.Get_Status (Status);
-
    Put_Line
-     ("[MAIN] Initial status: " & Status'Image);
-
-   -- Invalid command: already running
-   Engine.Resume (Success);
-
-   Put_Line
-     ("[MAIN] Resume accepted: " & Success'Image);
+     ("[MAIN] Initial status: "
+      & State.Get_Status'Image);
 
    delay 2.5;
 
    Engine.Pause (Success);
 
    Put_Line
-     ("[MAIN] Pause accepted: " & Success'Image);
-
-   Engine.Get_Status (Status);
-
-   Put_Line
-     ("[MAIN] Current status: " & Status'Image);
-
-   -- Invalid command: already paused
-   Engine.Pause (Success);
+     ("[MAIN] Pause accepted: "
+      & Success'Image);
 
    Put_Line
-     ("[MAIN] Second pause accepted: " & Success'Image);
+     ("[MAIN] Current status: "
+      & State.Get_Status'Image);
 
    delay 3.0;
 
    Engine.Resume (Success);
 
    Put_Line
-     ("[MAIN] Resume accepted: " & Success'Image);
+     ("[MAIN] Resume accepted: "
+      & Success'Image);
 
    delay 3.5;
 
@@ -94,5 +85,11 @@ begin
    Engine.Stop;
 
 end;
+
+-- Engine_Task has terminated here.
+
+Put_Line
+  ("[MAIN] Status after termination: "
+   & State.Get_Status'Image);
 
 end Ada_Radar;

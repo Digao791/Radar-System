@@ -3,6 +3,20 @@ with Ada.Real_Time;
 
 package body Radar.Engine is
    
+   protected body Engine_State is
+
+      procedure Set_Status (New_Status : in Engine_Status) is
+      begin
+         Current_Status := New_Status;
+      end Set_Status;
+
+      function Get_Status return Engine_Status is
+      begin
+         return Current_Status;
+      end Get_Status;
+
+   end Engine_State;
+
    task body Engine_Task is
 
       use Ada.Text_IO;
@@ -23,6 +37,7 @@ package body Radar.Engine is
             select 
                accept Pause (Success : out Boolean) do
                   Status := Paused;
+                  State.Set_Status (Paused);
                   Success := True;
                end Pause;
 
@@ -36,13 +51,8 @@ package body Radar.Engine is
 
                accept Stop do
                   Status := Stopped;
+                  State.Set_Status (Stopped);
                end Stop;
-            
-            or 
-
-               accept Get_Status (Status : out Engine_Status) do
-                  Status := Running;
-               end Get_Status;
 
             or
 
@@ -65,6 +75,7 @@ package body Radar.Engine is
                   Status := Running;
                   Next_Time := Clock + Seconds (1);
                   Success := True;
+                  State.Set_Status (Running);
                end Resume;
             
             or
@@ -77,13 +88,8 @@ package body Radar.Engine is
 
                accept Stop do
                   Status := Stopped;
+                  State.Set_Status (Stopped);
                end Stop;
-
-            or
-
-               accept Get_Status (Status : out Engine_Status) do
-                  Status := Paused;
-               end Get_Status;
 
             end select;
          end if;
