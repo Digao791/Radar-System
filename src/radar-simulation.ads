@@ -23,6 +23,12 @@ package Radar.Simulation is
    procedure Scan
       (Sim        : in Simulation;
        Station    : Radar.Detection.Radar_Station);
+
+   procedure Get_Target 
+      (Sim : in Simulation;
+       ID  : in Positive;
+       T   : out Radar.Targets.Target;
+       Found : out Boolean);
       
    procedure Print (Sim : in Simulation);
 

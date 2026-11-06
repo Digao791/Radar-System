@@ -22,6 +22,23 @@ package body Radar.Shared_State is
       begin
          return Data;
       end Get_Snapshot;
+
+   
+      procedure Get_Target
+      (ID    : in Positive;
+       T     : out Radar.Targets.Target;
+       Found : out Boolean)
+      is
+      begin
+
+         Radar.Simulation.Get_Target
+         (Sim   => Data,
+            ID    => ID,
+            T     => T,
+            Found => Found);
+
+      end Get_Target;
+
       
    end Shared_Simulation;
 

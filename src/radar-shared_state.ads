@@ -9,6 +9,9 @@ package Radar.Shared_State is
       procedure Add_Target (T : in Radar.Targets.Target);
       procedure Step (Delta_Time : in Float);
       function Get_Snapshot return Radar.Simulation.Simulation;
+      procedure Get_Target (ID    : in Positive;
+                            T     : out Radar.Targets.Target;
+                            Found : out Boolean);
 
    private 
 

@@ -65,6 +65,30 @@ package body Radar.Simulation is
       end if;
    end Scan;
 
+   procedure Get_Target 
+      (Sim : in Simulation;
+       ID  : in Positive;
+       T   : out Radar.Targets.Target;
+       Found : out Boolean)
+   is
+   begin
+      Found := False;
+      T := 
+         (ID => 1,
+          X => 0.0,
+          Y => 0.0,
+          Speed => 0.0,
+          Heading => 0.0);
+
+      for I in 1 .. Sim.Count loop
+         if Sim.Targets (I).ID = ID then
+            T := Sim.Targets (I);
+            Found := True;
+            exit;
+         end if;
+      end loop;
+   end Get_Target;
+
    procedure Print (Sim : in Simulation) is
    begin
       Put_Line ("Targets : " & Sim.Count'Image);

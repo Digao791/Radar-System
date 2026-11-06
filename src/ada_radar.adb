@@ -37,6 +37,17 @@ begin
    Shared.Add_Target (Target_2);
 
    declare
+      T : Radar.Targets.Target;
+      Found : Boolean;
+   begin
+      Shared.Get_Target (ID => 99, T => T, Found => Found);
+      if Found then
+         Put_Line ("Target found: " & T.ID'Image);
+      else
+         Put_Line ("Target not found");
+      end if;
+   end;
+   declare
 
       Start_Time : constant Time := Clock;
       
