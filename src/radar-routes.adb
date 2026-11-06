@@ -6,6 +6,7 @@ package body Radar.Routes is
    Detections_Path : constant String := "/api/radar/detections";
    Pause_Path : constant String := "/api/radar/pause";
    Resume_Path : constant String := "/api/radar/resume";
+   Config_Path : constant String := "/api/radar/config";
 
    function Resolve (Method : String; URI : String) return Route_Type is
    begin
@@ -17,6 +18,8 @@ package body Radar.Routes is
          return Get_Targets;
       elsif Method = "GET" and then URI = Detections_Path then
          return Get_Detections;
+      elsif Method = "GET" and then URI = Config_Path then
+            return Get_Config;
       elsif Method = "POST" and then URI = Pause_Path then
          return Pause_Radar;
       elsif Method = "POST" and then URI = Resume_Path then

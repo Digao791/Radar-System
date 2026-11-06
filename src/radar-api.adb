@@ -6,6 +6,7 @@ with Radar.Routes;
 with Radar.Handlers;
 with Radar.Handlers.Targets;
 with Radar.Handlers.Detection;
+with Radar.Handlers.Config;
 
 package body Radar.API is
 
@@ -43,6 +44,9 @@ package body Radar.API is
 
          when Radar.Routes.Get_Detections =>
             return Radar.Handlers.Detection.Get_All;
+         
+         when Radar.Routes.Get_Config =>
+            return Radar.Handlers.Config.Get;
 
          when Radar.Routes.Not_Found =>
             return AWS.Response.Build
