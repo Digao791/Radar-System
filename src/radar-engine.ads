@@ -2,7 +2,7 @@ with Radar.Shared_State;
 
 package Radar.Engine is
 
-   type Engine_Status is (Running, Paused, Stopped);
+   type Engine_Status is (Running, Paused, Stopped, Failed);
 
    protected type Engine_State is
 

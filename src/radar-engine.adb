@@ -1,5 +1,6 @@
 with Ada.Text_IO;
 with Ada.Real_Time;
+with Ada.Exceptions;
 
 package body Radar.Engine is
    
@@ -98,6 +99,15 @@ package body Radar.Engine is
       end loop;
 
       Put_Line ("[ENGINE] Stopped.");
+
+   exception
+      when E : others =>
+         State.Set_Status (Failed);
+         Put_Line ("[ENGINE] Unexpected Failure.");
+         Put_Line
+           ("[ENGINE] Exception: "
+            & Ada.Exceptions.Exception_Information (E));
+         
    end Engine_Task;  
 
 end Radar.Engine;
