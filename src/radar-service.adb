@@ -8,11 +8,24 @@ package body Radar.Service is
    is
    begin
 
-      if Service.State.Get_Status = Radar.Engine.Running then
-         Service.Engine.Pause (Success);
-      else
-         Success := False;
+      Success := False;
+
+      if Service.State.Get_Status = Radar.Engine.Stopped
+        or else Service.State.Get_Status = Radar.Engine.Failed
+      then
+         return;
       end if;
+
+      select
+         Service.Engine.Pause (Success);
+      or
+         delay 1.0;
+         Success := False;
+      end select;
+
+   exception
+      when Tasking_Error =>
+         Success := False;
 
    end Pause;
 
@@ -22,11 +35,24 @@ package body Radar.Service is
    is
    begin
 
-      if Service.State.Get_Status = Radar.Engine.Paused then
-         Service.Engine.Resume (Success);
-      else
-         Success := False;
+      Success := False;
+
+      if Service.State.Get_Status = Radar.Engine.Stopped
+        or else Service.State.Get_Status = Radar.Engine.Failed
+      then
+         return;
       end if;
+
+      select
+         Service.Engine.Resume (Success);
+      or
+         delay 1.0;
+         Success := False;
+      end select;
+
+   exception
+      when Tasking_Error =>
+         Success := False;
 
    end Resume;
 
@@ -36,16 +62,25 @@ package body Radar.Service is
    is
    begin
 
-      if Service.State.Get_Status = Radar.Engine.Running
-        or else Service.State.Get_Status = Radar.Engine.Paused
-      then
+      Success := False;
 
+      if Service.State.Get_Status = Radar.Engine.Stopped
+        or else Service.State.Get_Status = Radar.Engine.Failed
+      then
+         return;
+      end if;
+
+      select
          Service.Engine.Stop;
          Success := True;
-
-      else
+      or
+         delay 1.0;
          Success := False;
-      end if;
+      end select;
+
+   exception
+      when Tasking_Error =>
+         Success := False;
 
    end Stop;
 

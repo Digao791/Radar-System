@@ -83,6 +83,15 @@ begin
          & Radar.Engine.Engine_Status'Image
              (Radar.Service.Get_Status (Service)));
 
+      
+      --  Try pausing an already paused engine
+      Radar.Service.Pause (Service, Success);
+
+      Put_Line
+      ("[SERVICE] Second pause: "
+         & Success'Image);
+
+
       -- Keep the engine paused
       delay 3.0;
 
@@ -91,6 +100,14 @@ begin
 
       Put_Line
         ("[SERVICE] Resume: " & Success'Image);
+
+
+      --  Try resuming an already running engine
+      Radar.Service.Resume (Service, Success);
+
+      Put_Line
+      ("[SERVICE] Second resume: "
+         & Success'Image);
 
       -- Let the simulation run again
       delay 3.5;
