@@ -1,19 +1,24 @@
+
 with Ada.Text_IO;
-with Radar.Detection;
+
 with Radar.Targets;
 with Radar.Simulation;
+with Radar.Detection;
 with Radar.Shared_State;
-with Ada.Real_Time;
-
-use Ada.Text_IO;
-use Ada.Real_Time;
+with Radar.Engine;
 
 procedure Ada_Radar is
 
-   Shared : Radar.Shared_State.Shared_Simulation;
-   Station : constant Radar.Detection.Radar_Station
-      := (X => 0.0, Y => 0.0, Radar_Range => 30.0);
-   
+   use Ada.Text_IO;
+
+   Shared : aliased
+     Radar.Shared_State.Shared_Simulation;
+
+   Station : constant Radar.Detection.Radar_Station :=
+     (X           => 0.0,
+      Y           => 0.0,
+      Radar_Range => 30.0);
+
    Target_1 : constant Radar.Targets.Target :=
      (ID      => 1,
       X       => 10.0,
@@ -30,59 +35,64 @@ procedure Ada_Radar is
 
 begin
 
-   Put_Line ("===== ADA RADAR ======");
-   Shared.Initialize;
+   Put_Line ("=== ADA RADAR ===");
 
+   Shared.Initialize;
    Shared.Add_Target (Target_1);
    Shared.Add_Target (Target_2);
 
-   declare
-      T : Radar.Targets.Target;
-      Found : Boolean;
-   begin
-      Shared.Get_Target (ID => 99, T => T, Found => Found);
-      if Found then
-         Put_Line ("Target found: " & T.ID'Image);
-      else
-         Put_Line ("Target not found");
-      end if;
-   end;
-   declare
-
-      Start_Time : constant Time := Clock;
-      
-      task Simulation_Task;
-      task body Simulation_Task is
-         Next_Time : Time := Start_Time;
-      begin
-         for Second in 1 .. 5 loop
-
-            Next_Time := Next_Time + Seconds (1);
-            delay until Next_Time;
-            Shared.Step (1.0);
-
-            Put_Line ("[SIMULATION] Tick: " & Second'Image);
-         end loop;
-      end Simulation_Task;
-
-   begin
-
-      for Second in 0 .. 5 loop
-         delay until
-            Start_Time
-            + Milliseconds (500)
-            + Seconds (Second);
-
-         declare
-            Snapshot : Radar.Simulation.Simulation :=
-               Shared.Get_Snapshot;
-         begin
-            Put_Line ("[RADAR] Scan: " & Second'Image);
-            Radar.Simulation.Scan (Snapshot, Station);
-            New_Line;
-         end;
-      end loop;
-   end;
    
-   Put_Line ("Simulation Finished.");
+declare
+
+   Engine : Radar.Engine.Engine_Task
+     (Shared'Access);
+
+   Success : Boolean;
+   Status  : Radar.Engine.Engine_Status;
+
+begin
+
+   Engine.Get_Status (Status);
+
+   Put_Line
+     ("[MAIN] Initial status: " & Status'Image);
+
+   -- Invalid command: already running
+   Engine.Resume (Success);
+
+   Put_Line
+     ("[MAIN] Resume accepted: " & Success'Image);
+
+   delay 2.5;
+
+   Engine.Pause (Success);
+
+   Put_Line
+     ("[MAIN] Pause accepted: " & Success'Image);
+
+   Engine.Get_Status (Status);
+
+   Put_Line
+     ("[MAIN] Current status: " & Status'Image);
+
+   -- Invalid command: already paused
+   Engine.Pause (Success);
+
+   Put_Line
+     ("[MAIN] Second pause accepted: " & Success'Image);
+
+   delay 3.0;
+
+   Engine.Resume (Success);
+
+   Put_Line
+     ("[MAIN] Resume accepted: " & Success'Image);
+
+   delay 3.5;
+
+   Put_Line ("[MAIN] Stopping...");
+   Engine.Stop;
+
+end;
+
 end Ada_Radar;
