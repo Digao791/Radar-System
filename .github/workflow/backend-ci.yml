@@ -1,0 +1,43 @@
+name: Ada Backend CI
+
+on:
+  push: 
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+  permissions:
+    contents: read
+
+  jobs:
+
+    build-and-test:
+      name: Build and Unit Tests
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout Repository
+        - uses: actions/checkout@v4
+
+        - name: Setup Alire
+        - uses: alire-project/setup-alire@v6
+
+        - name: Select GNAT Toolchain
+        - run : | 
+            alr toolchain --select gnat_native=15.3.1 gprbuild
+
+        - name : Show toolchain
+        - run  : |
+            alr --version 
+            alr toolchain
+
+        - name : Build backend
+        - run  : alr -n build
+
+        - name : Run AUnit Tests
+        - working-directory: tests
+        - run  : alr -n run
