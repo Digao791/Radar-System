@@ -1,0 +1,45 @@
+/* Desktop: fixed viewport with independent scrolling in the contacts panel. */
+html, body, #root { height: 100%; min-height: 0; }
+body { overflow: hidden; }
+.dashboard { height: 100dvh; min-height: 0; overflow: hidden; }
+.dashboard-header { height: 58px; padding: 0 20px; }
+.brand-icon { width: 36px; height: 36px; font-size: 26px; }
+.brand h1 { font-size: 17px; }
+.dashboard-content { min-height: 0; overflow: hidden; padding: 10px; gap: 10px; grid-template-columns: 218px minmax(0,1fr) 270px; }
+.panel { min-height: 0; overflow: hidden; }
+.sidebar { padding: 15px 13px; overflow-y: auto; }
+.sidebar .info-block { padding: 11px 0; gap: 5px; }
+.sidebar .info-block strong { font-size: 16px; }
+.control-section { margin-top: 16px; gap: 8px; }
+.control-button { min-height: 38px; }
+.radar-panel { padding: 12px; min-height: 0; }
+.panel-heading { margin-bottom: 10px; }
+.radar-panel .radar-container { min-height: 0; overflow: hidden; }
+.radar-panel .radar-screen { width: auto; height: 100%; max-height: 100%; max-width: 100%; aspect-ratio: 1; object-fit: contain; }
+.radar-footer { padding-top: 9px; }
+.targets-panel { padding: 12px; min-height: 0; }
+.targets-list { flex: 1 1 auto; min-height: 60px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding-right: 3px; }
+.target-card { padding: 10px; flex-shrink: 0; }
+.target-card-header { margin-bottom: 8px; }
+.target-details { gap: 6px; }
+.selected-target-details { flex: 0 0 auto; margin-top: 10px; padding: 12px; max-height: 46%; overflow-y: auto; scrollbar-width: thin; border-color: #4d684c; background: linear-gradient(145deg,#192e29,#15232a); }
+.selected-target-heading { margin-bottom: 10px; align-items: flex-start; }
+.selected-target-heading h2 { font-size: 19px; color: #facc15; margin: 3px 0 0; letter-spacing: .5px; }
+.detail-eyebrow, .target-detail-section-label { color: #8da89d; font-size: 9px; font-weight: 700; letter-spacing: 1.3px; }
+.clear-selection { border: 1px solid #42564b !important; border-radius: 6px; width: 26px; height: 26px; }
+.target-summary { display: flex; align-items: center; gap: 6px; color: #86efac; font-size: 9px; font-weight: 700; letter-spacing: .6px; margin-bottom: 12px; }
+.target-summary-dot { height: 7px; width: 7px; background: #4ade80; border-radius: 50%; }
+.target-summary-id { margin-left: auto; color: #b8cbd3; }
+.target-detail-section-label { padding: 9px 0 6px; border-top: 1px solid #314a44; }
+.selected-target-grid { gap: 7px; margin-bottom: 9px; }
+.target-metric { border-radius: 6px; padding: 8px; background: #10251f; min-width: 0; }
+.target-metric span { font-size: 9px; color: #9eb7aa; }
+.target-metric strong { font-size: 16px; color: #eaf8ef; overflow-wrap: anywhere; }
+.target-metric small, .target-distance small { font-size: 9px; font-weight: 400; color: #91a89c; }
+.target-distance { display: flex; justify-content: space-between; gap: 7px; align-items: center; border-top: 1px solid #314a44; padding-top: 10px; }
+.target-distance span { font-size: 9px; color: #9eb7aa; }
+.target-distance strong { color: #facc15; font-size: 14px; white-space: nowrap; }
+.dashboard-footer { min-height: 28px; padding: 6px 20px; }
+@media (max-width: 1150px) { .dashboard-content { grid-template-columns: 190px minmax(0,1fr) 240px; } .targets-panel { grid-column: auto; } .targets-list { display: flex; grid-template-columns: none; } }
+@media (max-width: 800px) { body { overflow: auto; } .dashboard { height: auto; min-height: 100dvh; overflow: visible; } .dashboard-content { grid-template-columns: 1fr; overflow: visible; } .panel { overflow: visible; } .targets-panel { grid-column: auto; height: 460px; overflow: hidden; } .targets-list { overflow-y: auto; } .radar-panel .radar-screen { width: 100%; height: auto; max-height: min(65vh,650px); } .selected-target-details { max-height: 45%; } }
+@media (max-height: 650px) and (min-width: 801px) { .dashboard-header { height: 48px; } .dashboard-footer { display: none; } .sidebar .info-block { padding: 7px 0; } .control-section { margin-top: 9px; } }
