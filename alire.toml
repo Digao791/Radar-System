@@ -8,7 +8,7 @@ licenses = "MIT OR Apache-2.0 WITH LLVM-exception"
 website = ""
 tags = []
 
-executables = ["ada_radar"]
+executables = ["radar_http"]
 
 [[depends-on]]
 aws = "^25.2.0"
