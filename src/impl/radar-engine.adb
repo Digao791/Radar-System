@@ -1,6 +1,12 @@
+with Ada.Numerics;
+with Ada.Numerics.Float_Random;
 with Ada.Text_IO;
 with Ada.Real_Time;
 with Ada.Exceptions;
+with Radar.Configuration;
+with Radar.Simulation;
+with Radar.Target_Generator;
+with Radar.Targets;
 
 package body Radar.Engine is
    
@@ -28,9 +34,12 @@ package body Radar.Engine is
       Status    : Task_Status := Running;
       Next_Time : Time := Clock + Seconds (1);
       Tick      : Natural := 0;
-
+      Spawn_Counter : Natural := 0;
+      Next_Target_ID : Positive := 1;
+      Gen       : Ada.Numerics.Float_Random.Generator;
    begin
 
+      Ada.Numerics.Float_Random.Reset (Gen);
       loop 
 
          if Status = Running then
@@ -62,6 +71,32 @@ package body Radar.Engine is
                Shared.Step (1.0);
                Tick := Tick + 1;
 
+               Spawn_Counter := Spawn_Counter + 1;
+
+               if Spawn_Counter >= 10 then
+                  Spawn_Counter := 0;
+               
+                  declare
+                     Snapshot : constant Radar.Simulation.Simulation :=
+                        Shared.Get_Snapshot;
+                  begin
+                     if Radar.Simulation.Get_Count (Snapshot) 
+                        < Radar.Simulation.Max_Targets then
+                        declare
+                           New_Target : constant Radar.Targets.Target :=
+                              Radar.Target_Generator.Generate 
+                              (ID => Next_Target_ID,
+                               Station => Config.Get_Station,
+                               Gen => Gen);
+                        begin
+                           Shared.Add_Target (New_Target);
+                           Put_Line ("[ENGINE] New Target created: " 
+                           & Next_Target_ID'Image);
+                           Next_Target_ID := Next_Target_ID + 1;
+                        end;
+                     end if;
+                  end;
+               end if;
                Put_Line
                  ("[ENGINE] Tick:" & Tick'Image);
 

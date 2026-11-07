@@ -1,5 +1,5 @@
 with Radar.Shared_State;
-
+with Radar.Configuration;
 package Radar.Engine is
 
    type Engine_Status is (Running, Paused, Stopped, Failed);
@@ -18,7 +18,8 @@ package Radar.Engine is
    task type Engine_Task 
       (Shared : not null access
          Radar.Shared_State.Shared_Simulation;
-         State : not null access Engine_State) 
+         State : not null access Engine_State;
+         Config : not null access Radar.Configuration.Radar_Config) 
    is
       entry Pause (Success : out Boolean);
       entry Resume (Success : out Boolean);
