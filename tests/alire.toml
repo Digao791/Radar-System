@@ -1,0 +1,20 @@
+name = "tests"
+description = "Tests for the radar system"
+version = "0.1.0-dev"
+
+authors = ["Rodrigo Costa"]
+maintainers = ["Rodrigo Costa <example@example.com>"]
+licenses = "MIT OR Apache-2.0 WITH LLVM-exception"
+website = ""
+tags = []
+
+executables = ["tests"]
+
+[[depends-on]]
+aunit = "*"
+
+[[depends-on]]
+ada_radar = "*"
+
+[[pins]]
+ada_radar = { path='..' }
