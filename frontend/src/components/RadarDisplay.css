@@ -48,3 +48,35 @@
   font-size: 13px;
   font-family: monospace;
 }
+
+.radar-target-group {
+  cursor: pointer;
+  outline: none;
+}
+
+.radar-target-group:hover .radar-target {
+  fill: #facc15;
+}
+
+.radar-target-group.selected .radar-target {
+  fill: #facc15;
+  stroke: #fef08a;
+}
+
+.radar-target-group.selected .radar-target-label {
+  fill: #facc15;
+  font-weight: bold;
+}
+
+.radar-selection-ring {
+  fill: none;
+  stroke: #facc15;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
+.radar-target-group:focus-visible .radar-target-hitbox {
+  stroke: #facc15;
+  stroke-width: 2;
+}

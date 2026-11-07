@@ -17,6 +17,11 @@ function App() {
   const [status, setStatus] = useState<RadarStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [selectedTargetId, setSelectedTargetId] =
+  useState<number | null>(null);
+
+  const selectedTarget =
+  targets.find((target) => target.id === selectedTargetId) ?? null;
 
   useEffect(() => {
     let active = true;
@@ -170,7 +175,12 @@ function App() {
           </div>
 
           {config ? (
-            <RadarDisplay targets={targets} config={config} />
+            <RadarDisplay
+              targets={targets}
+              config={config}
+              selectedTargetId={selectedTargetId}
+              onSelectTarget={setSelectedTargetId}
+            />
           ) : (
             <div className="radar-loading">
               Waiting for radar configuration...
@@ -200,7 +210,14 @@ function App() {
               </p>
             ) : (
               targets.map((target) => (
-                <div className="target-card" key={target.id}>
+                <button
+                    type="button"
+                    className={`target-card ${
+                      selectedTargetId === target.id ? "target-card-selected" : ""
+                    }`}
+                    key={target.id}
+                    onClick={() => setSelectedTargetId(target.id)}
+                  >
                   <div className="target-card-header">
                     <strong>
                       TGT-{String(target.id).padStart(3, "0")}
@@ -214,10 +231,50 @@ function App() {
                     <span>SPD: {target.speed.toFixed(1)}</span>
                     <span>HDG: {target.heading.toFixed(0)}°</span>
                   </div>
-                </div>
+                </button>
               ))
             )}
           </div>
+          {selectedTarget && (
+          <div className="selected-target-details">
+            <div className="selected-target-heading">
+              <h2>SELECTED TARGET</h2>
+              <button
+                type="button"
+                onClick={() => setSelectedTargetId(null)}
+                aria-label="Clear target selection"
+              >
+                ✕
+              </button>
+            </div>
+
+            <strong>
+              TGT-{String(selectedTarget.id).padStart(3, "0")}
+            </strong>
+
+            <div className="selected-target-grid">
+              <div>
+                <span>POSITION X</span>
+                <strong>{selectedTarget.x.toFixed(2)}</strong>
+              </div>
+
+              <div>
+                <span>POSITION Y</span>
+                <strong>{selectedTarget.y.toFixed(2)}</strong>
+              </div>
+
+              <div>
+                <span>SPEED</span>
+                <strong>{selectedTarget.speed.toFixed(2)}</strong>
+              </div>
+
+              <div>
+                <span>HEADING</span>
+                <strong>{selectedTarget.heading.toFixed(0)}°</strong>
+              </div>
+            </div>
+          </div>
+        )}
         </aside>
       </main>
 
