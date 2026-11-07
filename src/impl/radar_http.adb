@@ -16,38 +16,21 @@ procedure Radar_HTTP is
    Web_Server : AWS.Server.HTTP;
    Shared     : aliased Radar.Shared_State.Shared_Simulation;
    State      : aliased Radar.Engine.Engine_State;
-   Engine     : aliased Radar.Engine.Engine_Task
-     (Shared'Access, State'Access);
    Config : aliased Radar.Configuration.Radar_Config;
+   Engine     : aliased Radar.Engine.Engine_Task
+     (Shared'Access, State'Access, Config'Access);
    Service : aliased Radar.Service.Radar_Service
    (Engine'Access,
       State'Access,
       Shared'Access,
       Config'Access);
 
-     -- First target
-   Target_1 : constant Radar.Targets.Target :=
-     (ID      => 1,
-      X       => 100.0,
-      Y       => 200.0,
-      Speed   => 0.0,
-      Heading => 90.0);
-
-   -- Second target
-   Target_2 : constant Radar.Targets.Target :=
-     (ID      => 2,
-      X       => 600.0,
-      Y       => 400.0,
-      Speed   => 0.0,
-      Heading => 180.0);
-
 begin
 
    Put_Line ("=== RADAR HTTP SERVER ===");
 
    Shared.Initialize;
-   Shared.Add_Target (Target_1);
-   Shared.Add_Target (Target_2);
+   
    Radar.API.Context.Initialize (Service'Unchecked_Access);
 
    AWS.Server.Start (Web_Server => Web_Server,
