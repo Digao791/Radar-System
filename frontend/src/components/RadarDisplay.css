@@ -1,0 +1,50 @@
+.radar-container {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 12px;
+  background: #07151a;
+  border: 1px solid #1e4d42;
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+
+.radar-screen {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.radar-background {
+  fill: #0b2526;
+  stroke: #2d8068;
+  stroke-width: 2;
+}
+
+.radar-ring {
+  fill: none;
+  stroke: #246b57;
+  stroke-width: 1;
+}
+
+.radar-axis {
+  stroke: #246b57;
+  stroke-width: 1;
+  stroke-dasharray: 5 5;
+}
+
+.radar-station {
+  fill: #4ade80;
+}
+
+.radar-target {
+  fill: #86efac;
+  stroke: #ffffff;
+  stroke-width: 1;
+}
+
+.radar-target-label {
+  fill: #bbf7d0;
+  font-size: 13px;
+  font-family: monospace;
+}
