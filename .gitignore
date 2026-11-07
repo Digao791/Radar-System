@@ -2,3 +2,11 @@
 /bin/
 /alire/
 /config/
+
+# Alire
+**/alire/
+**/config/
+
+# Build
+**/obj/
+**/bin/
