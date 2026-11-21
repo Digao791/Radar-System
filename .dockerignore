@@ -1,0 +1,7 @@
+.git
+.alire
+alire.lock
+bin/
+obj/
+frontend/node_modules/
+frontend/dist/

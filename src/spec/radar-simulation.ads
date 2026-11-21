@@ -3,7 +3,7 @@ with Radar.Detection;
 
 package Radar.Simulation is
 
-   Max_Targets : constant Positive := 10;
+   Max_Targets : constant Positive := 100;
 
    type Target_Array is
       array (Positive range 1 .. Max_Targets)

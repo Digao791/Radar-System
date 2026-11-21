@@ -1,0 +1,20 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.api
+    image: radar-system-api:local
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.web
+    image: radar-sysyem-web:local
+    ports:
+      - "5174:80"
+    depends_on:
+      - api
+    restart: unless-stopped

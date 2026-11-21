@@ -1,0 +1,78 @@
+
+# ==========================================
+# Stage 1 - Build Ada API
+# ==========================================
+
+FROM debian:bookworm-slim AS build
+
+ARG ALIRE_VERSION=2.1.1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    unzip \
+    git \
+    build-essential \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar Alire
+RUN curl -fsSL \
+    "https://github.com/alire-project/alire/releases/download/v${ALIRE_VERSION}/alr-${ALIRE_VERSION}-bin-x86_64-linux.zip" \
+    -o /tmp/alr.zip \
+    && mkdir -p /tmp/alire \
+    && unzip -q /tmp/alr.zip -d /tmp/alire \
+    && find /tmp/alire -type f -name alr -exec cp {} /usr/local/bin/alr \; \
+    && chmod +x /usr/local/bin/alr \
+    && alr --version
+
+WORKDIR /workspace
+
+COPY . .
+
+# Instalar toolchain e compilar a API
+RUN rm -rf .alire alire.lock \
+    && alr -n toolchain --select gnat_native=15.3.1 \
+    && alr -n toolchain --select gprbuild=26.0.1 \
+    && alr -n update \
+    && alr -n build
+
+# Coletar bibliotecas compartilhadas necessárias
+RUN mkdir -p /runtime-libs \
+    && find /root/.local/share/alire/toolchains \
+       \( -name "libgnat-15.so*" -o -name "libgnarl-15.so*" \) \
+       -exec cp -L {} /runtime-libs/ \; \
+    && test -f /runtime-libs/libgnat-15.so \
+    && test -f /runtime-libs/libgnarl-15.so
+
+# ==========================================
+# Stage 2 - Runtime
+# ==========================================
+
+FROM debian:bookworm-slim AS runtime
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libssl3 \
+    libgcc-s1 \
+    libstdc++6 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copiar executável Ada
+COPY --from=build /workspace/bin/radar_http /app/radar_http
+
+# Copiar runtime Ada
+COPY --from=build /runtime-libs/ /usr/local/lib/
+
+# Registrar bibliotecas no linker
+RUN ldconfig \
+    && chmod +x /app/radar_http \
+    && ldd /app/radar_http \
+    && ! ldd /app/radar_http | grep -q "not found"
+
+EXPOSE 8080
+
+CMD ["/app/radar_http"]
