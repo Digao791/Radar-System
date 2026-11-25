@@ -6,6 +6,7 @@ with Simulation_Tests;
 with Target_Tests;
 with Routes_Tests;
 with Config_JSON_Tests;
+with Daemon_Mode_Tests;
 
 package body Radar_Test_Suite is
 
@@ -23,6 +24,9 @@ package body Radar_Test_Suite is
 
    package Config_JSON_Caller is new AUnit.Test_Caller
       (Config_JSON_Tests.Test);
+
+   package Daemon_Mode_Caller is new AUnit.Test_Caller
+      (Daemon_Mode_Tests.Test);
 
    function Suite return AUnit.Test_Suites.Access_Test_Suite is
 
@@ -126,6 +130,11 @@ package body Radar_Test_Suite is
         (Config_JSON_Caller.Create
            ("Should reject non-numeric config field",
             Config_JSON_Tests.Should_Reject_Non_Numeric_Config_Field'Access));
+
+      Result.Add_Test
+        (Daemon_Mode_Caller.Create
+           ("Should serve HTTP while running in daemon mode",
+            Daemon_Mode_Tests.Should_Serve_HTTP_In_Daemon_Mode'Access));
 
 
       return Result;
