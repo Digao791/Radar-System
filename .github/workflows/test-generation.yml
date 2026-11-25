@@ -179,6 +179,17 @@ jobs:
           steps.context.outputs.scope == 'all'
         uses: alire-project/setup-alire@v6
 
+      - name: Restore Alire Cache
+        if: |
+            steps.context.outputs.scope == 'backend' ||
+            steps.context.outputs.scope == 'all'
+        uses: actions/cache/restore@v4
+        with:
+            path: ~/.cache/alire
+            key: ${{ runner.os }}-${{ runner.arch }}-alire-gnat15.3.1-gprbuild26.0.1-${{ hashFiles('**/alire.toml', '**/alire.lock') }}
+            restore-keys: |
+                ${{ runner.os }}-${{ runner.arch }}-alire-gnat15.3.1-gprbuild26.0.1-
+
       - name: Select GNAT Toolchain
         if: |
           steps.context.outputs.scope == 'backend' ||
