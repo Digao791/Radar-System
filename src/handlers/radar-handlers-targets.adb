@@ -1,37 +1,35 @@
 with AWS.Messages;
-with Radar.Api.Context;
+with Radar.API.Context;
 with Radar.Service;
-with Radar.Simulation;
+with Radar.DTO.Targets;
 with Radar.JSON;
+with Radar.API.Responses;
 
 package body Radar.Handlers.Targets is
 
-   use type Radar.Api.Context.Service_Access;
+   use type Radar.API.Context.Service_Access;
+
    function Get_All return AWS.Response.Data is
 
-      Service_Ref : constant Radar.Api.Context.Service_Access :=
+      Service_Ref : constant Radar.API.Context.Service_Access :=
          Radar.API.Context.Get_Service;
 
    begin
 
       if Service_Ref = null then
-         return AWS.Response.Build
-         (Content_Type => "application/json",
-            Message_Body =>
-            "{""error"":""Radar service unavailable""}",
-            Status_Code => AWS.Messages.S503);
+         return Radar.API.Responses.Build_Error
+         ("Radar service unavailable", AWS.Messages.S503);
       end if;
 
       declare
-         Snapshot : constant Radar.Simulation.Simulation :=
-            Radar.Service.Get_Snapshot (Service_Ref.all);
+         Response : constant Radar.DTO.Targets.Targets_Response :=
+            Radar.Service.Get_Targets (Service_Ref.all);
 
       begin
          return AWS.Response.Build
-         (Content_Type => "application/json",
-            Message_Body =>
-            Radar.JSON.To_JSON (Snapshot).Write);
-
+           (Content_Type => "application/json",
+            Message_Body => Radar.JSON.To_JSON (Response).Write,
+            Status_Code  => AWS.Messages.S200);
       end;
 
    end Get_All;

@@ -1,16 +1,12 @@
 with AWS.Messages;
-with GNATCOLL.JSON;
-
 with Radar.API.Context;
 with Radar.Service;
-with Radar.Simulation;
-with Radar.Targets;
-with Radar.Detection;
+with Radar.DTO.Detection;
 with Radar.JSON;
-with Radar.Detection;
+with Radar.API.Responses;
+
 package body Radar.Handlers.Detection is
 
-   use GNATCOLL.JSON;
    use type Radar.API.Context.Service_Access;
 
    function Get_All return AWS.Response.Data is
@@ -19,45 +15,23 @@ package body Radar.Handlers.Detection is
          Radar.API.Context.Get_Service;
 
    begin
-
       if Service_Ref = null then
-         return AWS.Response.Build
-         (Content_Type => "application/json",
-            Message_Body =>
-            "{""error"":""Radar service unavailable""}",
-            Status_Code => AWS.Messages.S503);
+         return Radar.API.Responses.Build_Error
+         ("Radar service unavailable", AWS.Messages.S503);
       end if;
 
       declare
-         Snapshot : constant Radar.Simulation.Simulation :=
-            Radar.Service.Get_Snapshot (Service_Ref.all);
-
-         Result : JSON_Value := Create_Object;
-         Items  : JSON_Array := Empty_Array;
-         Count  : constant Natural    := Radar.Simulation.Get_Count (Snapshot);
-         Station : constant Radar.Detection.Radar_Station :=
-            Radar.Service.Get_Station (Service_Ref.all);
+         Response : constant
+            Radar.DTO.Detection.Detections_Response :=
+               Radar.Service.Get_Detections (Service_Ref.all);
 
       begin
-         for I in 1 .. Count loop
-            declare
-               Target : constant Radar.Targets.Target :=
-                  Radar.Simulation.Get_Target_At (Snapshot, I);
-            begin
-               if Radar.Detection.Is_Detected (Station, Target) then
-                  Append (Items, Radar.JSON.To_JSON (Target));
-               end if;
-            end;
-         end loop;
-
-         Result.Set_Field ("detected_targets", Items);
-
          return AWS.Response.Build
-         (Content_Type => "application/json",
-            Message_Body =>
-            Result.Write);
-
+           (Content_Type => "application/json",
+            Message_Body => Radar.JSON.To_JSON (Response).Write,
+            Status_Code  => AWS.Messages.S200);
       end;
+
    end Get_All;
 
 end Radar.Handlers.Detection;

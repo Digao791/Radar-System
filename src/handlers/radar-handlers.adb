@@ -2,7 +2,10 @@ with AWS.Messages;
 with AWS.Response;
 with Radar.API.Context;
 with Radar.Service;
-with Radar.Engine;
+with Radar.DTO.Status;
+with Radar.JSON;
+with Radar.DTO.Control;
+with Radar.API.Responses;
 
 package body Radar.Handlers is 
    
@@ -16,94 +19,91 @@ package body Radar.Handlers is
 
    function Status return AWS.Response.Data is
 
-      Service_Ref : constant Radar.Api.Context.Service_Access :=
+      Service_Ref : constant Radar.API.Context.Service_Access :=
          Radar.API.Context.Get_Service;
 
    begin
-
       if Service_Ref = null then
-         return AWS.Response.Build
-         (Content_Type => "application/json",
-            Message_Body =>
-            "{""error"":""Radar service unavailable""}",
-            Status_Code => AWS.Messages.S503);
+         return Radar.API.Responses.Build_Error
+         ("Radar service unavailable", AWS.Messages.S503);
       end if;
 
       declare
-         Current_Status : constant Radar.Engine.Engine_Status :=
-            Radar.Service.Get_Status (Service_Ref.all);
-
-         Status_Name : constant String :=
-            Radar.Engine.Engine_Status'Image (Current_Status);
+         Response : constant Radar.DTO.Status.Status_Response :=
+            Radar.Service.Get_Status_Response (Service_Ref.all);
 
       begin
          return AWS.Response.Build
          (Content_Type => "application/json",
-            Message_Body =>
-            "{""status"":""" & Status_Name & """}");
+            Message_Body => Radar.JSON.To_JSON (Response).Write,
+            Status_Code  => AWS.Messages.S200);
       end;
-
    end Status;
 
-   function Pause return AWS.Response.Data is
+      function Pause return AWS.Response.Data is
 
-      Service_Ref : constant Radar.Api.Context.Service_Access :=
-         Radar.API.Context.Get_Service;
+         Service_Ref : constant Radar.API.Context.Service_Access :=
+            Radar.API.Context.Get_Service;
 
-      Success : Boolean;
-   begin
+         Success : Boolean;
+
+      begin
          if Service_Ref = null then
-            return AWS.Response.Build
-            (Content_Type => "application/json",
-               Message_Body =>
-               "{""error"":""Radar service unavailable""}",
-               Status_Code => AWS.Messages.S503);
+            return Radar.API.Responses.Build_Error
+            ("Radar service unavailable", AWS.Messages.S503);
          end if;
 
          Radar.Service.Pause (Service_Ref.all, Success);
 
          if not Success then
-            return AWS.Response.Build
-            (Content_Type => "application/json",
-               Message_Body =>
-               "{""error"":""Failed to pause radar service""}",
-               Status_Code => AWS.Messages.S500);
+            return Radar.API.Responses.Build_Error
+            ("Failed to pause radar service", AWS.Messages.S500);
          end if;
 
-         return AWS.Response.Build
+         declare
+            Response : constant Radar.DTO.Control.Control_Response :=
+               (Status => Radar.DTO.Control.Paused);
+
+         begin
+            return AWS.Response.Build
             (Content_Type => "application/json",
-               Message_Body =>
-               "{""status"": ""Paused""}");
+               Message_Body => Radar.JSON.To_JSON (Response).Write,
+               Status_Code  => AWS.Messages.S200);
+         end;
+
       end Pause;
 
       function Resume return AWS.Response.Data is
 
-         Service_Ref : constant Radar.Api.Context.Service_Access :=
+         Service_Ref : constant Radar.API.Context.Service_Access :=
             Radar.API.Context.Get_Service;
 
          Success : Boolean;
+
       begin
          if Service_Ref = null then
-            return AWS.Response.Build
-            (Content_Type => "application/json",
-               Message_Body =>
-               "{""error"":""Radar service unavailable""}",
-               Status_Code => AWS.Messages.S503);
+            return Radar.API.Responses.Build_Error
+            ("Radar service unavailable", AWS.Messages.S503);
          end if;
 
          Radar.Service.Resume (Service_Ref.all, Success);
 
          if not Success then
-            return AWS.Response.Build
-            (Content_Type => "application/json",
-               Message_Body =>
-               "{""error"":""Failed to resume radar service""}",
-               Status_Code => AWS.Messages.S500);
+            return Radar.API.Responses.Build_Error
+            ("Failed to resume radar service", AWS.Messages.S500);
          end if;
 
-         return AWS.Response.Build
+         declare
+            Response : constant Radar.DTO.Control.Control_Response :=
+               (Status => Radar.DTO.Control.Resumed);
+
+         begin
+            return AWS.Response.Build
             (Content_Type => "application/json",
-               Message_Body =>
-               "{""status"": ""Resumed""}");
+               Message_Body => Radar.JSON.To_JSON (Response).Write,
+               Status_Code  => AWS.Messages.S200);
+         end;
+
       end Resume;
+
 end Radar.Handlers;

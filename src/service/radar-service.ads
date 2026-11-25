@@ -1,9 +1,12 @@
-
 with Radar.Engine;
 with Radar.Shared_State;
 with Radar.Simulation;
 with Radar.Detection;
 with Radar.Configuration;
+with Radar.DTO.Targets;
+with Radar.DTO.Detection;
+with Radar.DTO.Config;
+with Radar.DTO.Status;
 
 package Radar.Service is
 
@@ -42,6 +45,23 @@ package Radar.Service is
    procedure Set_Station
       (Service : in out Radar_Service;
        Station : Radar.Detection.Radar_Station);
+
+   function Get_Targets
+      (Service : Radar_Service) 
+       return Radar.DTO.Targets.Targets_Response;
+
+   function Get_Detections
+      (Service : Radar_Service)
+   return Radar.DTO.Detection.Detections_Response;
+
+   function Get_Config
+   (Service : Radar_Service)
+   return Radar.DTO.Config.Config_Response;
+
+   function Get_Status_Response
+   (Service : Radar_Service)
+      return Radar.DTO.Status.Status_Response;
+       
 private
 
    type Radar_Service

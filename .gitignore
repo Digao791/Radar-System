@@ -10,3 +10,6 @@
 # Build
 **/obj/
 **/bin/
+
+# Vscode
+.vscode/
