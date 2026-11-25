@@ -1,6 +1,7 @@
 with GNATCOLL.JSON;
 
 package body Radar.JSON is
+
    function To_JSON (Target : Radar.Targets.Target) return GNATCOLL.JSON.JSON_Value is
       use GNATCOLL.JSON;
       Result : Json_Value := Create_Object;
@@ -25,6 +26,43 @@ package body Radar.JSON is
       end loop;
 
       Result.Set_Field ("targets", Items);
+      return Result;
+   end To_JSON;
+
+   function To_JSON
+   (Target : Radar.DTO.Targets.Target_Response)
+      return GNATCOLL.JSON.JSON_Value
+   is
+      use GNATCOLL.JSON;
+
+      Result : JSON_Value := Create_Object;
+
+   begin
+      Result.Set_Field ("id", Integer (Target.ID));
+      Result.Set_Field ("x", Target.X);
+      Result.Set_Field ("y", Target.Y);
+      Result.Set_Field ("speed", Target.Speed);
+      Result.Set_Field ("heading", Target.Heading);
+
+      return Result;
+   end To_JSON;
+
+   function To_JSON
+   (Response : Radar.DTO.Targets.Targets_Response)
+      return GNATCOLL.JSON.JSON_Value
+   is
+      use GNATCOLL.JSON;
+
+      Result : JSON_Value := Create_Object;
+      Items  : JSON_Array := Empty_Array;
+
+   begin
+      for Target of Response.Targets loop
+         Append (Items, To_JSON (Target));
+      end loop;
+
+      Result.Set_Field ("targets", Items);
+
       return Result;
    end To_JSON;
 

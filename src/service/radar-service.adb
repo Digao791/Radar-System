@@ -1,7 +1,9 @@
+with Radar.Targets;
 
 package body Radar.Service is
 
    use type Radar.Engine.Engine_Status;
+
    procedure Pause
      (Service : in out Radar_Service;
       Success : out Boolean)
@@ -116,5 +118,31 @@ package body Radar.Service is
    begin
       Service.Config.Set_Station (Station);
    end Set_Station;
+
+   function To_Response
+   (Target: Radar.Targets.Target) return Radar.DTO.Targets.Target_Response 
+   is
+   begin
+      return (
+         ID => Target.ID, 
+         X => Target.X, 
+         Y => Target.Y, 
+         Speed => Target.Speed, 
+         Heading => Target.Heading);
+   end To_Response;   
+   
+   function Get_Targets
+      (Service : Radar_Service) return Radar.DTO.Targets.Targets_Response
+      is
+         Snapshot : constant Radar.Simulation.Simulation := Get_Snapshot (Service);
+         Count    : constant Natural := Radar.Simulation.Get_Count (Snapshot);
+         Result   : Radar.DTO.Targets.Targets_Response (Count);
+      begin
+         for I in 1 .. Count loop
+            Result.Targets (I) := To_Response(Radar.Simulation.Get_Target_At (Snapshot, I));
+         end loop;
+
+         return Result;
+      end Get_Targets;
 
 end Radar.Service;
