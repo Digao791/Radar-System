@@ -38,19 +38,26 @@ package body Radar.Handlers is
             Message_Body => Radar.JSON.To_JSON (Response).Write,
             Status_Code  => AWS.Messages.S200);
       end;
-
    end Status;
 
-   function Pause return AWS.Response.Data is
+      function Pause return AWS.Response.Data is
 
-      Service_Ref : constant Radar.Api.Context.Service_Access :=
-         Radar.API.Context.Get_Service;
+         Service_Ref : constant Radar.API.Context.Service_Access :=
+            Radar.API.Context.Get_Service;
 
-      Success : Boolean;
-   begin
+         Success : Boolean;
+
+      begin
          if Service_Ref = null then
             return Radar.API.Responses.Build_Error
-            ("Failed to Pause Radar Service", AWS.Messages.S500);
+            ("Radar service unavailable", AWS.Messages.S503);
+         end if;
+
+         Radar.Service.Pause (Service_Ref.all, Success);
+
+         if not Success then
+            return Radar.API.Responses.Build_Error
+            ("Failed to pause radar service", AWS.Messages.S500);
          end if;
 
          declare
@@ -68,14 +75,22 @@ package body Radar.Handlers is
 
       function Resume return AWS.Response.Data is
 
-         Service_Ref : constant Radar.Api.Context.Service_Access :=
+         Service_Ref : constant Radar.API.Context.Service_Access :=
             Radar.API.Context.Get_Service;
 
          Success : Boolean;
+
       begin
          if Service_Ref = null then
             return Radar.API.Responses.Build_Error
-            ("Failed to Resume Radar Service", AWS.Messages.S500);
+            ("Radar service unavailable", AWS.Messages.S503);
+         end if;
+
+         Radar.Service.Resume (Service_Ref.all, Success);
+
+         if not Success then
+            return Radar.API.Responses.Build_Error
+            ("Failed to resume radar service", AWS.Messages.S500);
          end if;
 
          declare
@@ -88,5 +103,7 @@ package body Radar.Handlers is
                Message_Body => Radar.JSON.To_JSON (Response).Write,
                Status_Code  => AWS.Messages.S200);
          end;
+
       end Resume;
+
 end Radar.Handlers;
