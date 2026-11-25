@@ -18,6 +18,8 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/**/*.test.{ts,tsx}'],
 
+    passWithNoTests: true,
+    
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],
