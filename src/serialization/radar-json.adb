@@ -1,4 +1,5 @@
 with GNATCOLL.JSON;
+with Ada.Strings.Unbounded;
 
 package body Radar.JSON is
 
@@ -117,4 +118,39 @@ package body Radar.JSON is
       return Result;
    end To_JSON;
 
+   function To_JSON
+   (Response : Radar.DTO.Control.Control_Response)
+      return GNATCOLL.JSON.JSON_Value
+   is
+      use GNATCOLL.JSON;
+
+      Result : JSON_Value := Create_Object;
+
+   begin
+      case Response.Status is
+         when Radar.DTO.Control.Paused =>
+            Result.Set_Field ("status", "Paused");
+
+         when Radar.DTO.Control.Resumed =>
+            Result.Set_Field ("status", "Resumed");
+      end case;
+
+      return Result;
+   end To_JSON;
+
+   function To_JSON
+   (Response : Radar.DTO.Errors.Error_Response)
+      return GNATCOLL.JSON.JSON_Value
+   is
+      use GNATCOLL.JSON;
+      use Ada.Strings.Unbounded;
+
+      Result : JSON_Value := Create_Object;
+
+   begin
+      Result.Set_Field ("error", To_String (Response.Error));
+
+      return Result;
+   end To_JSON;
+   
 end Radar.JSON;
