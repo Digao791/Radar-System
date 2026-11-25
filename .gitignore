@@ -10,3 +10,6 @@
 
 # Vscode
 .vscode/
+
+# Alire CI installation
+/alire_install/
