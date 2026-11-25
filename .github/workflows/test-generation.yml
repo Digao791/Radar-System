@@ -251,8 +251,14 @@ jobs:
 
               Do not repeat the entire CI validation.
 
-              Run focused tests when necessary to verify
-              the generated test implementation.
+              Compile all modified Ada tests before finishing.
+
+              Correct compilation errors introduced by generated tests.
+
+              Run focused tests when necessary.
+
+              Do not finish while generated tests contain
+              compilation errors.
 
               Full validation will be performed by
               Radar System CI on the generated pull request.
@@ -273,6 +279,13 @@ jobs:
             --allow-tool='shell(mv:*)' \
             --no-ask-user \
             | tee "$RUNNER_TEMP/test-generation-report.md"
+      
+      - name: Validate Generated Ada Tests
+        if: |
+          steps.context.outputs.scope == 'backend' ||
+          steps.context.outputs.scope == 'all'
+        working-directory: tests
+        run: alr -n build
 
       - name: Validate Generated Changes
         if: steps.context.outputs.scope != 'none'
