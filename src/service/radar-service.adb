@@ -145,4 +145,56 @@ package body Radar.Service is
          return Result;
       end Get_Targets;
 
+   function Get_Detections
+   (Service : Radar_Service)
+      return Radar.DTO.Detection.Detections_Response
+   is
+      Snapshot : constant Radar.Simulation.Simulation :=
+         Get_Snapshot (Service);
+
+      Station : constant Radar.Detection.Radar_Station :=
+         Get_Station (Service);
+
+      Count : constant Natural :=
+         Radar.Simulation.Get_Count (Snapshot);
+
+      Items : Radar.DTO.Targets.Target_Response_Array (1 .. Count);
+
+      Detected_Count : Natural := 0;
+
+   begin
+      for I in 1 .. Count loop
+         declare
+            Target : constant Radar.Targets.Target :=
+               Radar.Simulation.Get_Target_At (Snapshot, I);
+         begin
+            if Radar.Detection.Is_Detected (Station, Target) then
+               Detected_Count := Detected_Count + 1;
+
+               Items (Detected_Count) := To_Response (Target);
+            end if;
+         end;
+      end loop;
+
+      return
+      (Count            => Detected_Count,
+         Detected_Targets => Items (1 .. Detected_Count));
+
+   end Get_Detections;
+
+   function Get_Config
+   (Service : Radar_Service)
+      return Radar.DTO.Config.Config_Response
+   is
+      Station : constant Radar.Detection.Radar_Station :=
+         Get_Station (Service);
+
+   begin
+      return
+      (X           => Station.X,
+         Y           => Station.Y,
+         Radar_Range => Station.Radar_Range);
+
+   end Get_Config;
+
 end Radar.Service;

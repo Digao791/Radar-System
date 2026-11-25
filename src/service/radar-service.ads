@@ -4,6 +4,8 @@ with Radar.Simulation;
 with Radar.Detection;
 with Radar.Configuration;
 with Radar.DTO.Targets;
+with Radar.DTO.Detection;
+with Radar.DTO.Config;
 
 package Radar.Service is
 
@@ -46,6 +48,14 @@ package Radar.Service is
    function Get_Targets
       (Service : Radar_Service) 
        return Radar.DTO.Targets.Targets_Response;
+
+   function Get_Detections
+      (Service : Radar_Service)
+   return Radar.DTO.Detection.Detections_Response;
+
+   function Get_Config
+   (Service : Radar_Service)
+   return Radar.DTO.Config.Config_Response;
        
 private
 
