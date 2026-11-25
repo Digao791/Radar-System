@@ -66,4 +66,39 @@ package body Radar.JSON is
       return Result;
    end To_JSON;
 
+   function To_JSON
+   (Response : Radar.DTO.Detection.Detections_Response)
+      return GNATCOLL.JSON.JSON_Value
+   is
+      use GNATCOLL.JSON;
+
+      Result : JSON_Value := Create_Object;
+      Items  : JSON_Array := Empty_Array;
+
+   begin
+      for Target of Response.Detected_Targets loop
+         Append (Items, To_JSON (Target));
+      end loop;
+
+      Result.Set_Field ("detected_targets", Items);
+
+      return Result;
+   end To_JSON;
+
+   function To_JSON
+   (Response : Radar.DTO.Config.Config_Response)
+      return GNATCOLL.JSON.JSON_Value
+   is
+      use GNATCOLL.JSON;
+
+      Result : JSON_Value := Create_Object;
+
+   begin
+      Result.Set_Field ("x", Response.X);
+      Result.Set_Field ("y", Response.Y);
+      Result.Set_Field ("radar_range", Response.Radar_Range);
+
+      return Result;
+   end To_JSON;
+
 end Radar.JSON;
