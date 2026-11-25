@@ -48,6 +48,9 @@ package body Radar.API is
          when Radar.Routes.Get_Config =>
             return Radar.Handlers.Config.Get;
 
+         when Radar.Routes.Update_Config =>
+            return Radar.Handlers.Config.Update (Request);
+
          when Radar.Routes.Not_Found =>
             return AWS.Response.Build
               (Content_Type => "application/json",

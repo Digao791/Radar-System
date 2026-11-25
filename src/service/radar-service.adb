@@ -222,4 +222,22 @@ package body Radar.Service is
       end case;
    end Get_Status_Response;
 
+   procedure Update_Config
+   (Service : in out Radar_Service;
+      Request : Radar.DTO.Config.Config_Request)
+   is
+      Station : constant Radar.Detection.Radar_Station :=
+      (X           => Request.X,
+         Y           => Request.Y,
+         Radar_Range => Request.Radar_Range);
+
+   begin
+      if not (Request.Radar_Range > 0.0) then
+         raise Constraint_Error with "Radar range must be positive";
+      end if;
+
+      Set_Station (Service, Station);
+
+   end Update_Config;
+
 end Radar.Service;

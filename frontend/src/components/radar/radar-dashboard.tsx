@@ -15,7 +15,7 @@ import {
 
 export function RadarDashboard() {
   const { targets, timestamp, error, isLoading } = useTargets()
-  const { config } = useRadarConfig()
+  const { config, station } = useRadarConfig()
   const { status } = useRadarStatus()
   const [filter] = useFilter()
   const [selectedId, setSelectedId] = useSelectedTargetId()
@@ -32,6 +32,8 @@ export function RadarDashboard() {
         <div className="flex flex-col gap-1">
           <h1 className="text-lg font-semibold text-balance">Radar dashboard</h1>
           <p className="font-mono text-xs text-muted-foreground">
+            Position ({station?.x.toFixed(1) ?? '—'}, {station?.y.toFixed(1) ?? '—'})
+            {' · '}
             Range {config.range} units · {config.sweepRpm} RPM · refresh {config.refreshMs} ms
             {isFilterActive(filter) && ' · filter applied'}
           </p>

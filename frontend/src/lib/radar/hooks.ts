@@ -12,17 +12,62 @@ import {
 import { useState } from 'react'
 import { radarApi } from '@/api/radarApi'
 import { toDisplayTarget } from '@/lib/radarAdapter'
+import { useSWRConfig } from 'swr'
+import type { RadarConfigRequest } from '@/types/radar'
 
 export function useRadarConfig() {
-  const { data, error, isLoading } = useSWR('/api/radar/config', radarApi.getConfig, {
-    refreshInterval: 1000,
-  })
-  const [prefs, setPrefs] = useLocalState('local:display', DEFAULT_CONFIG)
-  const config = { ...prefs, range: data?.radar_range ?? 0, showLost: false }
-  async function saveConfig(next: RadarConfig) {
-    await setPrefs({ ...next, range: 0, showLost: false })
+  const { mutate: mutateCache } = useSWRConfig()
+
+  const { data, error, isLoading, mutate } = useSWR(
+    '/api/radar/config',
+    radarApi.getConfig,
+    {
+      refreshInterval: 1000,
+    },
+  )
+
+  const [prefs, setPrefs] = useLocalState(
+    'local:display',
+    DEFAULT_CONFIG,
+  )
+
+  const config = {
+    ...prefs,
+    range: data?.radar_range ?? 0,
+    showLost: false,
   }
-  return { config, station: data, error, isLoading, saveConfig }
+
+  async function saveConfig(next: RadarConfig) {
+    await setPrefs({
+      ...next,
+      range: 0,
+      showLost: false,
+    })
+  }
+
+  async function updateStation(next: RadarConfigRequest) {
+    const updated = await mutate(
+      radarApi.updateConfig(next),
+      {
+        populateCache: true,
+        revalidate: false,
+        throwOnError: true,
+      },
+    )
+
+    await mutateCache('/api/radar/detections')
+
+    return updated
+  }
+
+  return {
+    config,
+    station: data,
+    error,
+    isLoading,
+    saveConfig,
+    updateStation,
+  }
 }
 export function useTargets() {
   const { config, station, error: configError, isLoading: configLoading } = useRadarConfig()
