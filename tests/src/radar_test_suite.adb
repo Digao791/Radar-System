@@ -2,6 +2,7 @@
 with AUnit.Test_Caller;
 with AUnit.Test_Suites;
 with Detection_Tests;
+with Simulation_Tests;
 with Target_Tests;
 
 package body Radar_Test_Suite is
@@ -11,6 +12,9 @@ package body Radar_Test_Suite is
 
    package Target_Caller is new AUnit.Test_Caller
    (Target_Tests.Test);
+
+   package Simulation_Caller is new AUnit.Test_Caller
+      (Simulation_Tests.Test);
 
    function Suite return AUnit.Test_Suites.Access_Test_Suite is
 
@@ -69,6 +73,26 @@ package body Radar_Test_Suite is
       (Target_Caller.Create
          ("Should move in negative direction",
             Target_Tests.Should_Move_In_Negative_Direction'Access));
+
+      Result.Add_Test
+        (Simulation_Caller.Create
+           ("Should initialize empty simulation",
+            Simulation_Tests.Should_Initialize_Empty_Simulation'Access));
+
+      Result.Add_Test
+        (Simulation_Caller.Create
+           ("Should add retrieve and count targets",
+            Simulation_Tests.Should_Add_Retrieve_And_Count_Targets'Access));
+
+      Result.Add_Test
+        (Simulation_Caller.Create
+           ("Should step all targets",
+            Simulation_Tests.Should_Step_All_Targets'Access));
+
+      Result.Add_Test
+        (Simulation_Caller.Create
+           ("Should reject invalid target index",
+            Simulation_Tests.Should_Reject_Invalid_Target_Index'Access));
 
 
       return Result;
