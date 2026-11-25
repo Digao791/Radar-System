@@ -4,6 +4,7 @@ with Radar.Routes;
 package body Routes_Tests is
 
    use AUnit.Assertions;
+   use type Radar.Routes.Route_Type;
 
    procedure Should_Resolve_Put_Config_Request
       (T : in out Test)
