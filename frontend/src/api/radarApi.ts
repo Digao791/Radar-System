@@ -1,45 +1,14 @@
-import type {
-  RadarStatusResponse,
-  RadarTargetsResponse,
-  RadarDetectionsResponse,
-  RadarConfig,
-} from "../types/radar";
-
-const BASE_URL = "/api/radar";
-
-async function request<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
-  const response = await fetch(`${BASE_URL}${endpoint}`, options);
-
-  if (!response.ok) {
-    throw new Error(`HTTP error: ${response.status}`);
-  }
-
-  return response.json() as Promise<T>;
+import type { RadarConfig, RadarStatusResponse, RadarTargetsResponse, RadarDetectionsResponse, RadarControlResponse } from '@/types/radar'
+async function request<T>(path: string, method = 'GET'): Promise<T> {
+  const res = await fetch(`/api/radar/${path}`, { method, cache: 'no-store' })
+  if (!res.ok) throw new Error(`Radar API: ${res.status}`)
+  return res.json() as Promise<T>
 }
-
 export const radarApi = {
-  getStatus: () =>
-    request<RadarStatusResponse>("/status"),
-
-  getTargets: () =>
-    request<RadarTargetsResponse>("/targets"),
-
-  getDetections: () =>
-    request<RadarDetectionsResponse>("/detections"),
-
-  getConfig: () =>
-    request<RadarConfig>("/config"),
-
-  pause: () =>
-    request<{ status: string }>("/pause", {
-      method: "POST",
-    }),
-
-  resume: () =>
-    request<{ status: string }>("/resume", {
-      method: "POST",
-    }),
-};
+  getConfig: () => request<RadarConfig>('config'),
+  getStatus: () => request<RadarStatusResponse>('status'),
+  getTargets: () => request<RadarTargetsResponse>('targets'),
+  getDetections: () => request<RadarDetectionsResponse>('detections'),
+  pause: () => request<RadarControlResponse>('pause', 'POST'),
+  resume: () => request<RadarControlResponse>('resume', 'POST'),
+}

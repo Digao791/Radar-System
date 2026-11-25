@@ -1,8 +1,0 @@
-.radar-map-container { width: 100%; height: 100%; min-height: 0; position: relative; overflow: hidden; border-radius: 10px; background: #0b1a20; }
-.radar-leaflet-map { width: 100%; height: 100%; min-height: 300px; z-index: 0; }
-.radar-map-caption { position: absolute; top: 10px; left: 10px; z-index: 500; padding: 6px 9px; border-radius: 5px; background: #091118d9; color: #86efac; font: 10px monospace; pointer-events: none; }
-.radar-map-container .leaflet-tooltip { background: #101e26; color: #d8fbe4; border-color: #3e6e56; font-family: monospace; font-weight: 700; }
-.radar-map-container .leaflet-tooltip::before { border-top-color: #3e6e56; }
-
-.radar-map-container { overscroll-behavior: contain; touch-action: pan-x pan-y; }
-.radar-leaflet-map { overscroll-behavior: contain; touch-action: none; }
