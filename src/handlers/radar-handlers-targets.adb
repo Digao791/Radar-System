@@ -3,6 +3,7 @@ with Radar.API.Context;
 with Radar.Service;
 with Radar.DTO.Targets;
 with Radar.JSON;
+with Radar.API.Responses;
 
 package body Radar.Handlers.Targets is
 
@@ -16,11 +17,8 @@ package body Radar.Handlers.Targets is
    begin
 
       if Service_Ref = null then
-         return AWS.Response.Build
-           (Content_Type => "application/json",
-            Message_Body =>
-              "{""error"":""Radar service unavailable""}",
-            Status_Code => AWS.Messages.S503);
+         return Radar.API.Responses.Build_Error
+         ("Radar service unavailable", AWS.Messages.S503);
       end if;
 
       declare
