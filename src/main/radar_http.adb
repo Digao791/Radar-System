@@ -1,3 +1,4 @@
+with Ada.Command_Line;
 with Ada.Text_IO;
 with AWS.Server;
 with Radar.API;
@@ -41,11 +42,21 @@ begin
    Put_Line ("[HTTP] Server started on port 8080.");
    Put_Line ("[HTTP] Press Enter or Ctrl+C to stop the server.");
 
-   declare
-      Dummy : constant String := Get_Line;
-   begin
-      null;
-   end;
+   if Ada.Command_Line.Argument_Count > 0 and 
+      then Ada.Command_Line.Argument (1) = "--daemon"
+   then
+      Put_Line ("[HTTP] Running in daemon mode.");
+
+      loop
+         delay 3600.0;
+      end loop;
+   else
+      declare
+         Dummy: constant String := Get_Line;
+      begin 
+         null;
+      end;
+   end if;
 
    AWS.Server.Shutdown (Web_Server);
    Put_Line ("[HTTP] Server stopped.");
