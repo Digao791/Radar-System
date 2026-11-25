@@ -6,6 +6,7 @@ project Tests is
       "domainTests/",
       "routesTests/",
       "serializationTests/",
+      "integrationTests/",
       "config/");
    for Object_Dir use "obj/" & Tests_Config.Build_Profile;
    for Create_Missing_Dirs use "True";
