@@ -44,4 +44,39 @@ describe('radarApi', () => {
 
     await expect(radarApi.getStatus()).rejects.toThrow('Radar API: 503')
   })
+
+  it('updates radar config with a JSON PUT request', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ x: 25, y: -10, radar_range: 750 }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+
+    await expect(
+      radarApi.updateConfig({ x: 25, y: -10, radar_range: 750 }),
+    ).resolves.toEqual({ x: 25, y: -10, radar_range: 750 })
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/radar/config', {
+      method: 'PUT',
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ x: 25, y: -10, radar_range: 750 }),
+    })
+  })
+
+  it('uses the API error message for unsuccessful config updates', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ error: 'Radar range must be positive' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+
+    await expect(
+      radarApi.updateConfig({ x: 0, y: 0, radar_range: 0 }),
+    ).rejects.toThrow('Radar range must be positive')
+  })
 })
