@@ -1,4 +1,10 @@
-import type { RadarConfig, RadarStatusResponse, RadarTargetsResponse, RadarDetectionsResponse, RadarControlResponse } from '@/types/radar'
+import type {
+  RadarConfig,
+  RadarStatusResponse,
+  RadarTargetsResponse,
+  RadarDetectionsResponse,
+  RadarControlResponse,
+} from '@/types/radar'
 async function request<T>(path: string, method = 'GET'): Promise<T> {
   const res = await fetch(`/api/radar/${path}`, { method, cache: 'no-store' })
   if (!res.ok) throw new Error(`Radar API: ${res.status}`)

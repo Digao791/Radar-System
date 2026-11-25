@@ -18,7 +18,7 @@ export function TargetDetail({ target, onClear }: TargetDetailProps) {
       >
         <Crosshair className="size-5 text-muted-foreground" aria-hidden="true" />
         <p className="text-sm font-medium">No target selected</p>
-        <p className="max-w-56 text-xs leading-relaxed text-muted-foreground text-pretty">
+        <p className="max-w-56 text-xs leading-relaxed text-pretty text-muted-foreground">
           Click a contact on the radar or in the list, or search by ID at the top.
         </p>
       </section>

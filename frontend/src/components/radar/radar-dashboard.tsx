@@ -49,7 +49,17 @@ export function RadarDashboard() {
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="rounded-lg border border-border bg-card p-3 md:p-5">
-          {config.range > 0 ? <RadarScope targets={inRange} config={config} selectedId={selectedId} onSelect={setSelectedId} isRunning={status === 'RUNNING'}/> : <p>Waiting for radar configuration…</p>}
+          {config.range > 0 ? (
+            <RadarScope
+              targets={inRange}
+              config={config}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              isRunning={status === 'RUNNING'}
+            />
+          ) : (
+            <p>Waiting for radar configuration…</p>
+          )}
         </div>
         <div className="flex flex-col gap-4">
           <TargetDetail target={selected} onClear={() => setSelectedId(null)} />

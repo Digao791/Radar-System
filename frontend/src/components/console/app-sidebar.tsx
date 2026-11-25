@@ -5,7 +5,12 @@ import { useTargets, useRadarStatus } from '@/lib/radar/hooks'
 
 const NAV = [
   { href: '/', label: 'Dashboard', description: 'Radar overview', icon: Radar },
-  { href: '/settings', label: 'Settings', description: 'Radar parameters', icon: SlidersHorizontal },
+  {
+    href: '/settings',
+    label: 'Settings',
+    description: 'Radar parameters',
+    icon: SlidersHorizontal,
+  },
   { href: '/targets', label: 'Targets', description: 'Discovered contacts', icon: List },
 ]
 
@@ -41,13 +46,17 @@ export function AppSidebar() {
                   className={cn(
                     'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
                     'hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:outline-none',
-                    isActive ? 'bg-sidebar-accent text-sidebar-primary' : 'text-sidebar-foreground/80',
+                    isActive
+                      ? 'bg-sidebar-accent text-sidebar-primary'
+                      : 'text-sidebar-foreground/80',
                   )}
                 >
                   <Icon className="size-4 shrink-0" aria-hidden="true" />
                   <span className="flex flex-col">
                     <span className="font-medium">{item.label}</span>
-                    <span className="hidden text-xs text-muted-foreground md:block">{item.description}</span>
+                    <span className="hidden text-xs text-muted-foreground md:block">
+                      {item.description}
+                    </span>
                   </span>
                 </Link>
               </li>
@@ -59,15 +68,32 @@ export function AppSidebar() {
       <div className="hidden border-t border-sidebar-border px-5 py-4 md:block">
         <div className="flex items-center gap-2 text-xs">
           <span
-            className={cn('size-2 rounded-full', offline ? 'bg-destructive' : isLoading ? 'bg-muted-foreground' : 'bg-primary')}
+            className={cn(
+              'size-2 rounded-full',
+              offline ? 'bg-destructive' : isLoading ? 'bg-muted-foreground' : 'bg-primary',
+            )}
             aria-hidden="true"
           />
-          <span className="text-muted-foreground">{offline ? 'Backend link down' : isLoading ? 'Connecting…' : 'Backend link active'}</span>
+          <span className="text-muted-foreground">
+            {offline ? 'Backend link down' : isLoading ? 'Connecting…' : 'Backend link active'}
+          </span>
         </div>
-        <p className="mt-2 text-xs">Engine: {status ?? "—"}</p>
+        <p className="mt-2 text-xs">Engine: {status ?? '—'}</p>
         <div className="mt-2 flex gap-2">
-          <button className="rounded border px-2 py-1 text-xs disabled:opacity-40" disabled={busy || !!offline || status !== "RUNNING"} onClick={() => void control("pause")}>Pause</button>
-          <button className="rounded border px-2 py-1 text-xs disabled:opacity-40" disabled={busy || !!offline || status !== "PAUSED"} onClick={() => void control("resume")}>Resume</button>
+          <button
+            className="rounded border px-2 py-1 text-xs disabled:opacity-40"
+            disabled={busy || !!offline || status !== 'RUNNING'}
+            onClick={() => void control('pause')}
+          >
+            Pause
+          </button>
+          <button
+            className="rounded border px-2 py-1 text-xs disabled:opacity-40"
+            disabled={busy || !!offline || status !== 'PAUSED'}
+            onClick={() => void control('resume')}
+          >
+            Resume
+          </button>
         </div>
         <p className="mt-2 font-mono text-xs text-muted-foreground">
           {active} contact{active === 1 ? '' : 's'} tracked
