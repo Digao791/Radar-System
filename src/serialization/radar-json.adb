@@ -101,4 +101,20 @@ package body Radar.JSON is
       return Result;
    end To_JSON;
 
+   function To_JSON
+   (Response : Radar.DTO.Status.Status_Response)
+      return GNATCOLL.JSON.JSON_Value
+   is
+      use GNATCOLL.JSON;
+
+      Result : JSON_Value := Create_Object;
+
+   begin
+      Result.Set_Field
+      ("status",
+         Radar.DTO.Status.Radar_Status'Image (Response.Status));
+
+      return Result;
+   end To_JSON;
+
 end Radar.JSON;

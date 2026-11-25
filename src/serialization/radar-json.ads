@@ -4,6 +4,7 @@ with Radar.Simulation;
 with Radar.DTO.Targets;
 with Radar.DTO.Detection;
 with Radar.DTO.Config;
+with Radar.DTO.Status;
 
 package Radar.JSON is
 
@@ -24,6 +25,10 @@ package Radar.JSON is
 
    function To_JSON
    (Response : Radar.DTO.Config.Config_Response)
+   return GNATCOLL.JSON.JSON_Value;
+
+   function To_JSON
+   (Response : Radar.DTO.Status.Status_Response)
    return GNATCOLL.JSON.JSON_Value;
 
    function To_JSON (Sim : Radar.Simulation.Simulation)

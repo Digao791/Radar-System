@@ -197,4 +197,29 @@ package body Radar.Service is
 
    end Get_Config;
 
+   function Get_Status_Response
+   (Service : Radar_Service)
+      return Radar.DTO.Status.Status_Response
+   is
+      Current_Status : constant Radar.Engine.Engine_Status :=
+         Get_Status (Service);
+
+   begin
+      case Current_Status is
+
+         when Radar.Engine.Running =>
+            return (Status => Radar.DTO.Status.Running);
+
+         when Radar.Engine.Paused =>
+            return (Status => Radar.DTO.Status.Paused);
+
+         when Radar.Engine.Stopped =>
+            return (Status => Radar.DTO.Status.Stopped);
+
+         when Radar.Engine.Failed =>
+            return (Status => Radar.DTO.Status.Failed);
+
+      end case;
+   end Get_Status_Response;
+
 end Radar.Service;

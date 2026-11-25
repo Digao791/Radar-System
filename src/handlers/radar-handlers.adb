@@ -2,7 +2,8 @@ with AWS.Messages;
 with AWS.Response;
 with Radar.API.Context;
 with Radar.Service;
-with Radar.Engine;
+with Radar.DTO.Status;
+with Radar.JSON;
 
 package body Radar.Handlers is 
    
@@ -16,11 +17,10 @@ package body Radar.Handlers is
 
    function Status return AWS.Response.Data is
 
-      Service_Ref : constant Radar.Api.Context.Service_Access :=
+      Service_Ref : constant Radar.API.Context.Service_Access :=
          Radar.API.Context.Get_Service;
 
    begin
-
       if Service_Ref = null then
          return AWS.Response.Build
          (Content_Type => "application/json",
@@ -30,17 +30,14 @@ package body Radar.Handlers is
       end if;
 
       declare
-         Current_Status : constant Radar.Engine.Engine_Status :=
-            Radar.Service.Get_Status (Service_Ref.all);
-
-         Status_Name : constant String :=
-            Radar.Engine.Engine_Status'Image (Current_Status);
+         Response : constant Radar.DTO.Status.Status_Response :=
+            Radar.Service.Get_Status_Response (Service_Ref.all);
 
       begin
          return AWS.Response.Build
          (Content_Type => "application/json",
-            Message_Body =>
-            "{""status"":""" & Status_Name & """}");
+            Message_Body => Radar.JSON.To_JSON (Response).Write,
+            Status_Code  => AWS.Messages.S200);
       end;
 
    end Status;

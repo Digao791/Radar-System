@@ -6,6 +6,7 @@ with Radar.Configuration;
 with Radar.DTO.Targets;
 with Radar.DTO.Detection;
 with Radar.DTO.Config;
+with Radar.DTO.Status;
 
 package Radar.Service is
 
@@ -56,6 +57,10 @@ package Radar.Service is
    function Get_Config
    (Service : Radar_Service)
    return Radar.DTO.Config.Config_Response;
+
+   function Get_Status_Response
+   (Service : Radar_Service)
+      return Radar.DTO.Status.Status_Response;
        
 private
 
