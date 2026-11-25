@@ -509,3 +509,28 @@ Validate:
 - Empty target collections.
 
 Use the actual HTTP and service
+
+### Ada Compilation and Visibility Rules
+
+- Use explicit package qualification.
+- Ensure operators are directly visible when comparing
+  values declared in external packages.
+- Prefer `use type Package.Type_Name` when only operator
+  visibility is required.
+- Follow the existing GNAT compiler and style switches.
+- Respect the configured maximum line length.
+- Avoid redundant with clauses.
+- Avoid trailing whitespace and multiple blank lines.
+- Never disable compiler diagnostics to hide failures.
+
+### Mandatory Validation
+
+After generating or modifying Ada tests:
+
+1. Execute `alr -n build` from the tests directory.
+2. Analyze compilation errors and style diagnostics.
+3. Correct errors introduced by generated tests.
+4. Repeat compilation until it succeeds.
+5. Report unresolved failures.
+
+Previous CI results cannot validate newly generated tests.

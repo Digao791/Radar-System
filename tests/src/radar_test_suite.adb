@@ -4,6 +4,8 @@ with AUnit.Test_Suites;
 with Detection_Tests;
 with Simulation_Tests;
 with Target_Tests;
+with Routes_Tests;
+with Config_JSON_Tests;
 
 package body Radar_Test_Suite is
 
@@ -15,6 +17,12 @@ package body Radar_Test_Suite is
 
    package Simulation_Caller is new AUnit.Test_Caller
       (Simulation_Tests.Test);
+
+   package Routes_Caller is new AUnit.Test_Caller
+      (Routes_Tests.Test);
+
+   package Config_JSON_Caller is new AUnit.Test_Caller
+      (Config_JSON_Tests.Test);
 
    function Suite return AUnit.Test_Suites.Access_Test_Suite is
 
@@ -93,6 +101,31 @@ package body Radar_Test_Suite is
         (Simulation_Caller.Create
            ("Should reject invalid target index",
             Simulation_Tests.Should_Reject_Invalid_Target_Index'Access));
+
+      Result.Add_Test
+        (Routes_Caller.Create
+           ("Should resolve PUT config request",
+            Routes_Tests.Should_Resolve_Put_Config_Request'Access));
+
+      Result.Add_Test
+        (Routes_Caller.Create
+           ("Should reject POST to config request",
+            Routes_Tests.Should_Reject_Post_To_Config_Request'Access));
+
+      Result.Add_Test
+        (Config_JSON_Caller.Create
+           ("Should parse config request",
+            Config_JSON_Tests.Should_Parse_Config_Request'Access));
+
+      Result.Add_Test
+        (Config_JSON_Caller.Create
+           ("Should reject missing config field",
+            Config_JSON_Tests.Should_Reject_Missing_Config_Field'Access));
+
+      Result.Add_Test
+        (Config_JSON_Caller.Create
+           ("Should reject non-numeric config field",
+            Config_JSON_Tests.Should_Reject_Non_Numeric_Config_Field'Access));
 
 
       return Result;
