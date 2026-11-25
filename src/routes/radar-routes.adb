@@ -24,6 +24,8 @@ package body Radar.Routes is
          return Pause_Radar;
       elsif Method = "POST" and then URI = Resume_Path then
          return Resume_Radar;
+      elsif Method = "PUT" and then URI = Config_Path then
+         return Update_Config;
       else
          return Not_Found;
       end if;
