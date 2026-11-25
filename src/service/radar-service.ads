@@ -46,6 +46,10 @@ package Radar.Service is
       (Service : in out Radar_Service;
        Station : Radar.Detection.Radar_Station);
 
+   procedure Update_Config
+      (Service : in out Radar_Service;
+       Request : Radar.DTO.Config.Config_Request);
+
    function Get_Targets
       (Service : Radar_Service) 
        return Radar.DTO.Targets.Targets_Response;
