@@ -1,0 +1,437 @@
+name: Test Generation Agent
+
+on:
+  workflow_run:
+    workflows:
+      - Radar System CI
+    types:
+      - completed
+    branches:
+      - main
+
+  workflow_dispatch:
+    inputs:
+
+      scope:
+        description: Application scope
+        required: true
+        type: choice
+        default: all
+        options:
+          - backend
+          - frontend
+          - all
+
+      mode:
+        description: Execution mode
+        required: true
+        type: choice
+        default: missing
+        options:
+          - missing
+          - changes
+          - reorganize
+
+      base_ref:
+        description: Base revision for changes mode
+        required: false
+        type: string
+        default: HEAD~1
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: test-generation
+  cancel-in-progress: false
+
+jobs:
+
+  generate-tests:
+
+    name: Generate Automated Tests
+
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main'
+      )
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    outputs:
+      has_changes: ${{ steps.patch.outputs.has_changes }}
+      scope: ${{ steps.context.outputs.scope }}
+      mode: ${{ steps.context.outputs.mode }}
+      revision: ${{ steps.context.outputs.revision }}
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || 'main' }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Determine Execution Context
+        id: context
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_SCOPE: ${{ inputs.scope }}
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_BASE_REF: ${{ inputs.base_ref }}
+        run: |
+          set -euo pipefail
+
+          REVISION=$(git rev-parse HEAD)
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+
+            SCOPE="$INPUT_SCOPE"
+            MODE="$INPUT_MODE"
+            BASE_REF="${INPUT_BASE_REF:-HEAD~1}"
+
+          else
+
+            MODE="changes"
+            BASE_REF="HEAD~1"
+
+            BACKEND=false
+            FRONTEND=false
+
+            if git diff --name-only "$BASE_REF" HEAD \
+              | grep -q '^src/'; then
+              BACKEND=true
+            fi
+
+            if git diff --name-only "$BASE_REF" HEAD \
+              | grep -q '^frontend/src/'; then
+              FRONTEND=true
+            fi
+
+            if [ "$BACKEND" = true ] && [ "$FRONTEND" = true ]; then
+              SCOPE="all"
+            elif [ "$BACKEND" = true ]; then
+              SCOPE="backend"
+            elif [ "$FRONTEND" = true ]; then
+              SCOPE="frontend"
+            else
+              SCOPE="none"
+            fi
+
+          fi
+
+          if [ "$MODE" = "changes" ]; then
+            BASE_REF=$(git rev-parse --verify "${BASE_REF}^{commit}")
+          fi
+
+          echo "scope=$SCOPE" >> "$GITHUB_OUTPUT"
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "base_ref=$BASE_REF" >> "$GITHUB_OUTPUT"
+          echo "revision=$REVISION" >> "$GITHUB_OUTPUT"
+
+          echo "Scope: $SCOPE"
+          echo "Mode: $MODE"
+          echo "Base revision: $BASE_REF"
+          echo "Revision: $REVISION"
+
+      - name: Prepare CI Results Directory
+        if: steps.context.outputs.scope != 'none'
+        run: mkdir -p "$RUNNER_TEMP/ci-results"
+
+      - name: Download CI Artifacts
+        if: |
+          steps.context.outputs.scope != 'none' &&
+          github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ runner.temp }}/ci-results
+
+      - name: Show Available CI Reports
+        if: steps.context.outputs.scope != 'none'
+        run: |
+          find "$RUNNER_TEMP/ci-results" -type f
+
+      - name: Setup Node.js
+        if: steps.context.outputs.scope != 'none'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Copilot CLI
+        if: steps.context.outputs.scope != 'none'
+        run: npm install -g @github/copilot
+
+      - name: Show Copilot Version
+        if: steps.context.outputs.scope != 'none'
+        run: copilot --version
+
+      - name: Setup Alire
+        if: |
+          steps.context.outputs.scope == 'backend' ||
+          steps.context.outputs.scope == 'all'
+        uses: alire-project/setup-alire@v6
+
+      - name: Select GNAT Toolchain
+        if: |
+          steps.context.outputs.scope == 'backend' ||
+          steps.context.outputs.scope == 'all'
+        run: |
+          alr toolchain --select gnat_native=15.3.1 gprbuild
+
+      - name: Install Frontend Dependencies
+        if: |
+          steps.context.outputs.scope == 'frontend' ||
+          steps.context.outputs.scope == 'all'
+        working-directory: frontend
+        run: npm ci
+
+      - name: Generate Tests
+        if: steps.context.outputs.scope != 'none'
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+          SCOPE: ${{ steps.context.outputs.scope }}
+          MODE: ${{ steps.context.outputs.mode }}
+          BASE_REF: ${{ steps.context.outputs.base_ref }}
+          CI_RESULTS: ${{ runner.temp }}/ci-results
+        run: |
+          set -o pipefail
+
+          copilot \
+            --agent=test-generator \
+            --add-dir "$CI_RESULTS" \
+            -p "
+              Read .github/skills/test-generation/SKILL.md.
+
+              Scope: $SCOPE
+              Mode: $MODE
+              Base revision: $BASE_REF
+
+              Existing CI reports are available at:
+              $CI_RESULTS
+
+              Analyze available build logs, test results
+              and coverage reports.
+
+              If no CI reports are available, analyze
+              the repository and existing tests directly.
+
+              Identify missing tests and regression risks.
+
+              Implement and organize tests according to
+              the agent instructions and skill.
+
+              In changes mode, prioritize production
+              changes relative to the base revision.
+
+              In reorganize mode, preserve existing
+              test behavior and assertions.
+
+              Only modify authorized test directories.
+
+              Do not modify production code.
+
+              Do not repeat the entire CI validation.
+
+              Run focused tests when necessary to verify
+              the generated test implementation.
+
+              Full validation will be performed by
+              Radar System CI on the generated pull request.
+
+              Do not commit or push changes.
+
+              Report generated tests, covered scenarios,
+              executed commands and remaining limitations.
+            " \
+            --allow-tool=write \
+            --allow-tool='shell(alr:*)' \
+            --allow-tool='shell(npm:*)' \
+            --allow-tool='shell(git diff:*)' \
+            --allow-tool='shell(git status:*)' \
+            --allow-tool='shell(git log:*)' \
+            --allow-tool='shell(git show:*)' \
+            --allow-tool='shell(mkdir:*)' \
+            --allow-tool='shell(mv:*)' \
+            --no-ask-user \
+            | tee "$RUNNER_TEMP/test-generation-report.md"
+
+      - name: Validate Generated Changes
+        if: steps.context.outputs.scope != 'none'
+        env:
+          SCOPE: ${{ steps.context.outputs.scope }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+
+          scope = os.environ["SCOPE"]
+
+          tracked = subprocess.check_output([
+              "git", "diff", "--no-renames",
+              "--name-only", "-z", "HEAD"
+          ]).decode().split("\0")
+
+          untracked = subprocess.check_output([
+              "git", "ls-files", "--others",
+              "--exclude-standard", "-z"
+          ]).decode().split("\0")
+
+          files = set(tracked + untracked) - {""}
+
+          def allowed(path):
+              if scope in ("backend", "all"):
+                  if path.startswith("tests/"):
+                      return True
+
+              if scope in ("frontend", "all"):
+                  if path.startswith("frontend/tests/"):
+                      return True
+
+              return False
+
+          invalid = sorted(
+              path for path in files
+              if not allowed(path)
+          )
+
+          if invalid:
+              print("Unauthorized changes:")
+
+              for path in invalid:
+                  print(path)
+
+              raise SystemExit(1)
+
+          print("Generated changes validated.")
+          PY
+
+      - name: Generate Test Patch
+        id: patch
+        if: steps.context.outputs.scope != 'none'
+        run: |
+          git add -A
+
+          if git diff --cached --quiet; then
+
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No new tests or changes generated."
+
+          else
+
+            git diff --cached --binary \
+              > "$RUNNER_TEMP/generated-tests.patch"
+
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+          fi
+
+      - name: Upload Generated Tests
+        if: steps.patch.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-tests
+          path: ${{ runner.temp }}/generated-tests.patch
+          retention-days: 7
+
+      - name: Upload Agent Report
+        if: |
+          always() &&
+          steps.context.outputs.scope != 'none'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-generation-report
+          path: ${{ runner.temp }}/test-generation-report.md
+          retention-days: 14
+
+
+  create-pull-request:
+
+    name: Create Test Pull Request
+
+    needs: generate-tests
+
+    if: needs.generate-tests.outputs.has_changes == 'true'
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+
+      - name: Checkout Main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.AUTOMATION_GITHUB_TOKEN }}
+
+      - name: Verify Base Revision
+        env:
+          EXPECTED_REVISION: ${{ needs.generate-tests.outputs.revision }}
+        run: |
+          CURRENT_REVISION=$(git rev-parse HEAD)
+
+          if [ "$CURRENT_REVISION" != "$EXPECTED_REVISION" ]; then
+            echo "Main changed during test generation."
+            echo "Run the agent again against the latest revision."
+            exit 1
+          fi
+
+      - name: Download Generated Tests
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-tests
+          path: ${{ runner.temp }}/generated
+
+      - name: Apply Generated Test Patch
+        run: |
+          git apply --check \
+            "$RUNNER_TEMP/generated/generated-tests.patch"
+
+          git apply \
+            "$RUNNER_TEMP/generated/generated-tests.patch"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.AUTOMATION_GITHUB_TOKEN }}
+          base: main
+
+          branch: automation/tests-${{ needs.generate-tests.outputs.scope }}-${{ needs.generate-tests.outputs.mode }}
+
+          delete-branch: true
+
+          commit-message: "test: generate automated tests"
+
+          title: "test: generated ${{ needs.generate-tests.outputs.scope }} tests"
+
+          body: |
+            ## Automated Test Generation
+
+            Tests generated by GitHub Copilot CLI.
+
+            ### Execution Context
+
+            - Scope: ${{ needs.generate-tests.outputs.scope }}
+            - Mode: ${{ needs.generate-tests.outputs.mode }}
+            - Base revision: ${{ needs.generate-tests.outputs.revision }}
+
+            ### Validation
+
+            Existing CI reports were reused when available.
+
+            Full validation is delegated to Radar System CI
+            and must succeed before merging this pull request.
+
+            Review the workflow artifacts for the complete
+            agent execution report.
