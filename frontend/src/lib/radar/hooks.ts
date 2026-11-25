@@ -14,7 +14,9 @@ import { radarApi } from '@/api/radarApi'
 import { toDisplayTarget } from '@/lib/radarAdapter'
 
 export function useRadarConfig() {
-  const { data, error, isLoading } = useSWR('/api/radar/config', radarApi.getConfig, { refreshInterval: 1000 })
+  const { data, error, isLoading } = useSWR('/api/radar/config', radarApi.getConfig, {
+    refreshInterval: 1000,
+  })
   const [prefs, setPrefs] = useLocalState('local:display', DEFAULT_CONFIG)
   const config = { ...prefs, range: data?.radar_range ?? 0, showLost: false }
   async function saveConfig(next: RadarConfig) {
@@ -24,16 +26,35 @@ export function useRadarConfig() {
 }
 export function useTargets() {
   const { config, station, error: configError, isLoading: configLoading } = useRadarConfig()
-  const { data, error, isLoading } = useSWR('/api/radar/detections', async () => ({ ...(await radarApi.getDetections()), timestamp: Date.now() }), { refreshInterval: config.refreshMs, dedupingInterval: 250 })
-  return { targets: station ? (data?.detected_targets ?? []).map(t => toDisplayTarget(t, station)) : [], timestamp: data?.timestamp, error: error ?? configError, isLoading: isLoading || configLoading }
+  const { data, error, isLoading } = useSWR(
+    '/api/radar/detections',
+    async () => ({ ...(await radarApi.getDetections()), timestamp: Date.now() }),
+    { refreshInterval: config.refreshMs, dedupingInterval: 250 },
+  )
+  return {
+    targets: station ? (data?.detected_targets ?? []).map((t) => toDisplayTarget(t, station)) : [],
+    timestamp: data?.timestamp,
+    error: error ?? configError,
+    isLoading: isLoading || configLoading,
+  }
 }
 export function useRadarStatus() {
-  const { data, error, mutate } = useSWR('/api/radar/status', radarApi.getStatus, { refreshInterval: 1000 })
+  const { data, error, mutate } = useSWR('/api/radar/status', radarApi.getStatus, {
+    refreshInterval: 1000,
+  })
   const [busy, setBusy] = useState(false)
   const [controlError, setControlError] = useState<unknown>(null)
   async function control(action: 'pause' | 'resume') {
-    setBusy(true); setControlError(null)
-    try { await radarApi[action](); await mutate() } catch (e) { setControlError(e) } finally { setBusy(false) }
+    setBusy(true)
+    setControlError(null)
+    try {
+      await radarApi[action]()
+      await mutate()
+    } catch (e) {
+      setControlError(e)
+    } finally {
+      setBusy(false)
+    }
   }
   return { status: data?.status, error: error ?? controlError, busy, control }
 }
@@ -92,5 +113,9 @@ export const fmt = {
   deg: (v: number) => `${String(Math.round(v)).padStart(3, '0')}°`,
   kn: (v: number) => `${Math.round(v)} units/s`,
   time: (ts: number) =>
-    new Date(ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    new Date(ts).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }),
 }

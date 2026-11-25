@@ -3,7 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowDown, ArrowUp, Radar } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import {
   applyFilter,
@@ -108,8 +115,15 @@ export function TargetsTable() {
           <TableBody>
             {rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={COLUMNS.length + 2} className="py-10 text-center text-muted-foreground">
-                  {error ? 'Backend unavailable.' : isLoading ? 'Loading targets…' : 'No targets match the filter.'}
+                <TableCell
+                  colSpan={COLUMNS.length + 2}
+                  className="py-10 text-center text-muted-foreground"
+                >
+                  {error
+                    ? 'Backend unavailable.'
+                    : isLoading
+                      ? 'Loading targets…'
+                      : 'No targets match the filter.'}
                 </TableCell>
               </TableRow>
             ) : (
@@ -120,14 +134,19 @@ export function TargetsTable() {
                     key={t.id}
                     data-state={selected ? 'selected' : undefined}
                     onClick={() => setSelectedId(selected ? null : t.id)}
-                    className={cn('cursor-pointer font-mono tabular-nums', selected && 'bg-accent/10')}
+                    className={cn(
+                      'cursor-pointer font-mono tabular-nums',
+                      selected && 'bg-accent/10',
+                    )}
                   >
                     <TableCell>
                       <Badge variant={t.status === 'ativo' ? 'default' : 'secondary'}>
                         {t.status === 'ativo' ? 'Active' : 'Lost'}
                       </Badge>
                     </TableCell>
-                    <TableCell className={cn('font-medium', selected && 'text-accent')}>{t.id}</TableCell>
+                    <TableCell className={cn('font-medium', selected && 'text-accent')}>
+                      {t.id}
+                    </TableCell>
                     <TableCell className="text-right">{t.x.toFixed(1)}</TableCell>
                     <TableCell className="text-right">{t.y.toFixed(1)}</TableCell>
                     <TableCell className="text-right">{Math.round(t.speed)}</TableCell>

@@ -47,7 +47,7 @@ export function ContactList({ targets, selectedId, onSelect }: ContactListProps)
                   />
                   {t.id}
                 </span>
-                <span className="tabular-nums text-muted-foreground">{fmt.kn(t.speed)}</span>
+                <span className="text-muted-foreground tabular-nums">{fmt.kn(t.speed)}</span>
                 <span className="w-16 text-right tabular-nums">{fmt.km(distanceKm(t))}</span>
               </button>
             </li>

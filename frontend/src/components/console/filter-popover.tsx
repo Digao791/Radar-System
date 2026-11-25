@@ -35,7 +35,9 @@ export function FilterPopover() {
         <PopoverContent align="end" className="w-80 gap-5 p-4">
           <div className="flex flex-col gap-1">
             <h2 className="text-sm font-semibold">Target filter</h2>
-            <p className="text-xs text-muted-foreground">Applied to the radar and the targets list.</p>
+            <p className="text-xs text-muted-foreground">
+              Applied to the radar and the targets list.
+            </p>
           </div>
 
           <fieldset className="flex flex-col gap-2">
@@ -66,7 +68,9 @@ export function FilterPopover() {
                 Speed
               </span>
               <span className="font-mono">
-                {filter.speed[0]}–{filter.speed[1] >= SPEED_LIMITS[1] ? `${SPEED_LIMITS[1]}+` : filter.speed[1]} units/s
+                {filter.speed[0]}–
+                {filter.speed[1] >= SPEED_LIMITS[1] ? `${SPEED_LIMITS[1]}+` : filter.speed[1]}{' '}
+                units/s
               </span>
             </div>
             <Slider
@@ -98,25 +102,27 @@ export function FilterPopover() {
             />
           </div>
 
-          <Button variant="outline" size="sm" onClick={() => setFilter(DEFAULT_FILTER)} disabled={!active}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFilter(DEFAULT_FILTER)}
+            disabled={!active}
+          >
             Clear filter
           </Button>
         </PopoverContent>
       </Popover>
-      {active && !open &&(
+      {active && !open && (
         <Button
-            variant="outline"
-            size="icon"
-            disabled={!active}
-            aria-hidden={!active}
-            onClick={() => setFilter(DEFAULT_FILTER)}
-            className={cn(
-              'shrink-0',
-              !active && 'invisible pointer-events-none'
-            )}
-          >
-            <X className="size-4" />
-          </Button>
+          variant="outline"
+          size="icon"
+          disabled={!active}
+          aria-hidden={!active}
+          onClick={() => setFilter(DEFAULT_FILTER)}
+          className={cn('shrink-0', !active && 'pointer-events-none invisible')}
+        >
+          <X className="size-4" />
+        </Button>
       )}
     </div>
   )

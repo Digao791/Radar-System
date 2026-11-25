@@ -1,0 +1,25 @@
+name: Radar System CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+
+  backend:
+    name: Backend CI
+    uses: ./.github/workflows/backend-ci.yml
+
+  frontend:
+    name: Frontend CI
+    uses: ./.github/workflows/frontend-ci.yml

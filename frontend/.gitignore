@@ -1,3 +1,8 @@
 node_modules/
 dist/
 *.tsbuildinfo
+
+# CI reports
+/reports/
+/frontend/reports/
+/frontend/coverage/

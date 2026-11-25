@@ -1,7 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -182,16 +181,16 @@
 
 /* Sliders */
 
-[data-slot="slider"] {
+[data-slot='slider'] {
   width: 100%;
   min-width: 0;
 }
 
-[data-slot="slider"] > div {
+[data-slot='slider'] > div {
   min-height: 24px;
 }
 
-[data-slot="slider-track"] {
+[data-slot='slider-track'] {
   height: 6px;
   min-height: 6px;
   width: 100%;
@@ -199,13 +198,13 @@
   border-radius: 999px;
 }
 
-[data-slot="slider-range"] {
+[data-slot='slider-range'] {
   height: 100%;
   background: var(--primary);
   border-radius: 999px;
 }
 
-[data-slot="slider-thumb"] {
+[data-slot='slider-thumb'] {
   width: 16px;
   height: 16px;
   background: var(--primary);
@@ -214,7 +213,7 @@
   cursor: grab;
 }
 
-[data-slot="slider-thumb"]:focus-visible {
+[data-slot='slider-thumb']:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 4px;
 }

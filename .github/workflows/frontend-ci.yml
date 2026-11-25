@@ -1,0 +1,68 @@
+name: React Frontend CI
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+
+  build-and-test:
+    name: Build and Frontend Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Prepare Reports Directory
+        run: mkdir -p reports
+
+      - name: Run Tests and Generate Coverage
+        run: |
+          set -o pipefail
+
+          npm run test:coverage -- \
+            --reporter=default \
+            --reporter=json \
+            --reporter=junit \
+            --outputFile.json=reports/tests.json \
+            --outputFile.junit=reports/tests.xml \
+            2>&1 | tee reports/tests.log
+
+      - name: Build Frontend
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee reports/build.log
+
+      - name: Upload Frontend Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-reports
+          path: frontend/reports/
+          retention-days: 14
+
+      - name: Upload Frontend Coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/
+          retention-days: 14

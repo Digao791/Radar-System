@@ -59,14 +59,24 @@ export function RadarScope({ targets, config, selectedId, onSelect, isRunning }:
         role="group"
         aria-label={`Radar scope, ${config.range} units range, ${visible.length} visible targets`}
       >
-        <circle r={R}         fill="transparent"
-        className="stroke-primary/40" strokeWidth={0.5} onClick={() => onSelect(null)} />
+        <circle
+          r={R}
+          fill="transparent"
+          className="stroke-primary/40"
+          strokeWidth={0.5}
+          onClick={() => onSelect(null)}
+        />
 
         <g className="pointer-events-none" aria-hidden="true">
           {RINGS.map((f) => (
             <g key={f}>
               <circle r={R * f} fill="none" className="stroke-primary/20" strokeWidth={0.35} />
-              <text x={1.5} y={-R * f + 4} className="fill-muted-foreground font-mono" fontSize={3.6}>
+              <text
+                x={1.5}
+                y={-R * f + 4}
+                className="fill-muted-foreground font-mono"
+                fontSize={3.6}
+              >
                 {Math.round(config.range * f)} units
               </text>
             </g>
@@ -80,7 +90,14 @@ export function RadarScope({ targets, config, selectedId, onSelect, isRunning }:
             const label = polar(deg, R + 6)
             return (
               <g key={deg}>
-                <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} className="stroke-primary/40" strokeWidth={0.4} />
+                <line
+                  x1={a.x}
+                  y1={a.y}
+                  x2={b.x}
+                  y2={b.y}
+                  className="stroke-primary/40"
+                  strokeWidth={0.4}
+                />
                 {major && (
                   <text
                     x={label.x}
@@ -132,7 +149,12 @@ export function RadarScope({ targets, config, selectedId, onSelect, isRunning }:
               onBlur={() => setHoveredId((h) => (h === t.id ? null : h))}
             >
               <circle r={7} fill="transparent" />
-              <circle r={6} fill="none" className="focus-ring stroke-foreground opacity-0" strokeWidth={0.5} />
+              <circle
+                r={6}
+                fill="none"
+                className="focus-ring stroke-foreground opacity-0"
+                strokeWidth={0.5}
+              />
               {config.showVectors && !lost && (
                 <line
                   x1={0}
@@ -151,7 +173,16 @@ export function RadarScope({ targets, config, selectedId, onSelect, isRunning }:
                     className="stroke-accent motion-safe:animate-[radar-ping_1.6s_ease-out_infinite]"
                     strokeWidth={0.5}
                   />
-                  <rect x={-4.5} y={-4.5} width={9} height={9} fill="none" className="stroke-accent" strokeWidth={0.5} strokeDasharray="2.5 4" />
+                  <rect
+                    x={-4.5}
+                    y={-4.5}
+                    width={9}
+                    height={9}
+                    fill="none"
+                    className="stroke-accent"
+                    strokeWidth={0.5}
+                    strokeDasharray="2.5 4"
+                  />
                 </>
               )}
               <rect
@@ -161,7 +192,11 @@ export function RadarScope({ targets, config, selectedId, onSelect, isRunning }:
                 height={3.6}
                 transform="rotate(45)"
                 className={cn(
-                  lost ? 'fill-none stroke-muted-foreground' : selected ? 'fill-accent' : 'fill-primary',
+                  lost
+                    ? 'fill-none stroke-muted-foreground'
+                    : selected
+                      ? 'fill-accent'
+                      : 'fill-primary',
                 )}
                 strokeWidth={lost ? 0.5 : 0}
                 strokeDasharray={lost ? '1 0.8' : undefined}
@@ -170,7 +205,14 @@ export function RadarScope({ targets, config, selectedId, onSelect, isRunning }:
                 <text
                   x={4}
                   y={-3}
-                  className={cn('font-mono', selected ? 'fill-accent' : lost ? 'fill-muted-foreground' : 'fill-foreground/80')}
+                  className={cn(
+                    'font-mono',
+                    selected
+                      ? 'fill-accent'
+                      : lost
+                        ? 'fill-muted-foreground'
+                        : 'fill-foreground/80',
+                  )}
                   fontSize={3.4}
                 >
                   {t.id}

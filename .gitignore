@@ -2,10 +2,7 @@
 /bin/
 /alire/
 /config/
-
-# Alire
-**/alire/
-**/config/
+/tests/config
 
 # Build
 **/obj/
