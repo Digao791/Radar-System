@@ -153,4 +153,59 @@ package body Radar.JSON is
       return Result;
    end To_JSON;
    
+   function Read_Number
+  (Object : GNATCOLL.JSON.JSON_Value;
+   Field  : String)
+   return Float
+   is
+      use GNATCOLL.JSON;
+
+      Value : JSON_Value;
+
+   begin
+      if not Object.Has_Field (Field) then
+         raise Invalid_Config_Request
+         with "Missing field: " & Field;
+      end if;
+
+      Value := Object.Get (Field);
+
+      case Value.Kind is
+
+         when JSON_Int_Type =>
+            return Float
+            (Long_Long_Integer'(Value.Get));
+
+         when JSON_Float_Type =>
+            return Value.Get;
+
+         when others =>
+            raise Invalid_Config_Request
+            with "Invalid numeric field: " & Field;
+
+      end case;
+   end Read_Number;
+
+
+   function From_JSON
+   (Body_JSON : String)
+      return Radar.DTO.Config.Config_Request
+   is
+      use GNATCOLL.JSON;
+
+      Object : constant JSON_Value :=
+         Read (Body_JSON);
+
+   begin
+      if Object.Kind /= JSON_Object_Type then
+         raise Invalid_Config_Request
+         with "Expected a JSON object";
+      end if;
+
+      return
+      (X           => Read_Number (Object, "x"),
+         Y           => Read_Number (Object, "y"),
+         Radar_Range => Read_Number (Object, "radar_range"));
+
+   end From_JSON;
 end Radar.JSON;

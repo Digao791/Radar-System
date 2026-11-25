@@ -44,4 +44,9 @@ package Radar.JSON is
    function To_JSON (Sim : Radar.Simulation.Simulation)
     return GNATCOLL.JSON.JSON_Value;
     
+   Invalid_Config_Request : exception;
+
+   function From_JSON
+   (Body_JSON : String) return Radar.DTO.Config.Config_Request;
+   
 end Radar.JSON;
