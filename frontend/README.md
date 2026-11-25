@@ -1,32 +1,7 @@
-# React + TypeScript + Vite
+# Sentinel Radar frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Replace the existing frontend directory with this directory. Run `npm install`, then `npm run build` and `npm run dev`. Start Ada on port 8080. Commit the generated package-lock.json before using Docker (npm ci). Existing Nginx must proxy /api/ to api:8080 without stripping the prefix and use try_files for SPA routes.
 
-Currently, two official plugins are available:
+No Next.js or simulation backend. Display preferences are in memory; range is read-only. No lost contacts or observation history are invented. Heading is converted from Ada's mathematical angle (east, counterclockwise) to compass bearing (north, clockwise). Distances and speeds use simulation units.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Build not executed: npm registry unavailable in generation environment.
