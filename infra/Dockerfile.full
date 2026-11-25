@@ -1,0 +1,108 @@
+# ==========================================
+# Stage 1 - Build Ada API
+# ==========================================
+
+FROM debian:bookworm-slim AS ada-build
+
+ARG ALIRE_VERSION=2.1.1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    unzip \
+    git \
+    build-essential \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL \
+    "https://github.com/alire-project/alire/releases/download/v${ALIRE_VERSION}/alr-${ALIRE_VERSION}-bin-x86_64-linux.zip" \
+    -o /tmp/alr.zip \
+    && mkdir -p /tmp/alire \
+    && unzip -q /tmp/alr.zip -d /tmp/alire \
+    && find /tmp/alire -type f -name alr -exec cp {} /usr/local/bin/alr \; \
+    && chmod +x /usr/local/bin/alr \
+    && alr --version
+
+WORKDIR /workspace
+
+COPY alire.toml ada_radar.gpr ./
+COPY src/ ./src/
+
+RUN alr -n toolchain --select gnat_native=15.3.1 \
+    && alr -n toolchain --select gprbuild=26.0.1 \
+    && alr -n update \
+    && alr -n build
+
+RUN mkdir -p /runtime-libs \
+    && find /root/.local/share/alire/toolchains \
+       \( -name "libgnat-15.so*" -o -name "libgnarl-15.so*" \) \
+       -exec cp -L {} /runtime-libs/ \; \
+    && test -f /runtime-libs/libgnat-15.so \
+    && test -f /runtime-libs/libgnarl-15.so
+
+
+# ==========================================
+# Stage 2 - Build React Frontend
+# ==========================================
+
+FROM node:22-alpine AS web-build
+
+WORKDIR /workspace
+
+COPY frontend/package*.json ./
+
+RUN npm ci
+
+COPY frontend/ ./
+
+RUN npm run build
+
+
+# ==========================================
+# Stage 3 - Complete Application Runtime
+# ==========================================
+
+FROM debian:bookworm-slim AS runtime
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libssl3 \
+    libgcc-s1 \
+    libstdc++6 \
+    nginx \
+    supervisor \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Ada executable and runtime libraries
+COPY --from=ada-build /workspace/bin/radar_http /app/radar_http
+COPY --from=ada-build /runtime-libs/ /usr/local/lib/
+
+RUN ldconfig \
+    && chmod +x /app/radar_http \
+    && ldd /app/radar_http \
+    && ! ldd /app/radar_http | grep -q "not found"
+
+# React application
+COPY --from=web-build /workspace/dist/ /usr/share/nginx/html/
+
+# Nginx configuration
+RUN rm -f /etc/nginx/sites-enabled/default
+
+COPY infra/nginx.full.conf /etc/nginx/conf.d/radar.conf
+
+# Process manager configuration
+COPY infra/supervisord.conf /etc/supervisor/supervisord.conf
+
+RUN nginx -t
+
+EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -fsS http://127.0.0.1/api/radar/status > /dev/null || exit 1
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
