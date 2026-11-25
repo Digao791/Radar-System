@@ -6,4 +6,10 @@ package Radar.DTO.Config is
       Radar_Range : Float;
    end record;
 
+   type Config_Request is record
+      X           : Float;
+      Y           : Float;
+      Radar_Range : Float;
+   end record;
+
 end Radar.DTO.Config;
