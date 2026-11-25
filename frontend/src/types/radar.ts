@@ -11,6 +11,13 @@ export interface RadarConfig {
   y: number
   radar_range: number
 }
+
+export interface RadarConfigRequest {
+  x: number
+  y: number
+  radar_range: number
+}
+
 export interface RadarStatusResponse {
   status: RadarStatus
 }

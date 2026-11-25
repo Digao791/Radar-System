@@ -5,7 +5,8 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { useRadarConfig } from '@/lib/radar/hooks'
 import { DEFAULT_CONFIG, type RadarConfig } from '@/lib/radar/types'
-
+import { Input } from '@/components/ui/input'
+import type { RadarConfigRequest } from '@/types/radar'
 const SLIDERS: {
   key: 'sweepRpm' | 'refreshMs'
   label: string
@@ -43,6 +44,198 @@ const TOGGLES: { key: 'showLabels' | 'showVectors'; label: string; description: 
     description: 'Line indicating heading and speed.',
   },
 ]
+
+function StationForm({
+  initial,
+}: {
+  initial: RadarConfigRequest
+}) {
+  const { updateStation } = useRadarConfig()
+
+  const [draft, setDraft] = useState({
+    x: String(initial.x),
+    y: String(initial.y),
+    radar_range: String(initial.radar_range),
+  })
+
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState('')
+  const [failed, setFailed] = useState(false)
+
+  const request: RadarConfigRequest = {
+    x: Number(draft.x),
+    y: Number(draft.y),
+    radar_range: Number(draft.radar_range),
+  }
+
+  const valid =
+    Object.values(draft).every((v) => v.trim() !== '') &&
+    Object.values(request).every(Number.isFinite) &&
+    request.radar_range > 0
+
+  const dirty =
+    request.x !== initial.x ||
+    request.y !== initial.y ||
+    request.radar_range !== initial.radar_range
+
+  function update(
+    key: keyof RadarConfigRequest,
+    value: string,
+  ) {
+    setDraft((previous) => ({
+      ...previous,
+      [key]: value,
+    }))
+
+    setMessage('')
+    setFailed(false)
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    if (!valid || saving) return
+
+    setSaving(true)
+    setMessage('')
+    setFailed(false)
+
+    try {
+      await updateStation(request)
+
+      setMessage('Radar configuration saved.')
+    } catch (error) {
+      setFailed(true)
+
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Could not update radar configuration.',
+      )
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="radar-settings-form"
+    >
+      <fieldset
+        disabled={saving}
+        className="radar-settings-card"
+      >
+        <legend className="px-1 text-sm font-medium">
+          Radar station
+        </legend>
+
+        <div className="radar-settings-fields">
+          <p className="text-xs text-muted-foreground">
+            Configure the radar position and detection range.
+          </p>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="station-x">
+                Position X
+              </Label>
+
+              <Input
+                id="station-x"
+                type="number"
+                step="any"
+                required
+                value={draft.x}
+                onChange={(e) =>
+                  update('x', e.target.value)
+                }
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="station-y">
+                Position Y
+              </Label>
+
+              <Input
+                id="station-y"
+                type="number"
+                step="any"
+                required
+                value={draft.y}
+                onChange={(e) =>
+                  update('y', e.target.value)
+                }
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="station-range">
+              Radar range (units)
+            </Label>
+
+            <Input
+              id="station-range"
+              type="number"
+              step="any"
+              required
+              value={draft.radar_range}
+              onChange={(e) =>
+                update('radar_range', e.target.value)
+              }
+            />
+
+            <span className="text-xs text-muted-foreground">
+              Detection range must be greater than zero.
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="submit"
+              disabled={!valid || !dirty || saving}
+            >
+              {saving
+                ? 'Saving…'
+                : 'Save radar configuration'}
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!dirty || saving}
+              onClick={() => {
+                setDraft({
+                  x: String(initial.x),
+                  y: String(initial.y),
+                  radar_range: String(initial.radar_range),
+                })
+
+                setMessage('')
+                setFailed(false)
+              }}
+            >
+              Reset changes
+            </Button>
+          </div>
+
+          <p
+            role="status"
+            className={
+              failed
+                ? 'text-xs text-destructive'
+                : 'text-xs text-muted-foreground'
+            }
+          >
+            {message}
+          </p>
+        </div>
+      </fieldset>
+    </form>
+  )
+}
 
 function ConfigForm({ initial }: { initial: RadarConfig }) {
   const { saveConfig } = useRadarConfig()
@@ -144,23 +337,46 @@ function ConfigForm({ initial }: { initial: RadarConfig }) {
 }
 
 export function RadarConfigForm() {
-  const { config, isLoading, error } = useRadarConfig()
+  const { config, station, isLoading, error } =
+    useRadarConfig()
 
   return (
     <div className="radar-settings-page">
       <div className="flex flex-col gap-1">
-        <h1 className="radar-settings-title">Radar settings</h1>
+        <h1 className="radar-settings-title">
+          Radar settings
+        </h1>
+
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Display preferences are local. Radar range is controlled by Ada.
+          Configure the radar station and display preferences.
         </p>
       </div>
-      <p className="radar-settings-range font-mono text-xs">
-        Radar range: {error ? 'Unavailable' : config.range || '—'} units (read only)
-      </p>
+
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading settings…</p>
+        <p className="text-sm text-muted-foreground">
+          Loading settings…
+        </p>
       ) : (
-        <ConfigForm key={JSON.stringify(config)} initial={config} />
+        <>
+          {station ? (
+            <StationForm initial={station} />
+          ) : (
+            <p className="text-sm text-destructive">
+              Radar configuration unavailable.
+            </p>
+          )}
+
+          {error && station && (
+            <p className="text-xs text-destructive">
+              Could not refresh radar configuration.
+            </p>
+          )}
+
+          <ConfigForm
+            key={JSON.stringify(config)}
+            initial={config}
+          />
+        </>
       )}
     </div>
   )
